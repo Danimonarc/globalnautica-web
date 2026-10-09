@@ -33,7 +33,7 @@ T = {
         "tag": "Asesoría náutica integral en la Costa del Sol desde 1999.",
         "footer_services": "Servicios",
         "footer_company": "Empresa",
-        "legal": "Aviso legal y privacidad",
+        "legal": [("aviso-legal/", "Aviso legal"), ("aviso-legal/#privacidad", "Privacidad"), ("aviso-legal/#cookies", "Cookies")],
         "funding": "Global Nautica ha recibido una ayuda de la Unión Europea con cargo al Fondo NextGenerationEU, en el marco del Plan de Recuperación, Transformación y Resiliencia, para la adquisición de vehículo eléctrico enchufable dentro del Programa de incentivos a la movilidad eficiente y sostenible (Programa MOVES III Andalucía) del Ministerio para la Transición Ecológica y el Reto Demográfico, gestionado por la Junta de Andalucía, a través de la Agencia Andaluza de la Energía.",
         "locale": "es_ES",
     },
@@ -48,7 +48,7 @@ T = {
         "tag": "Full-service nautical consultancy on the Costa del Sol since 1999.",
         "footer_services": "Services",
         "footer_company": "Company",
-        "legal": "Legal notice (Spanish)",
+        "legal": [("en/legal-notice/", "Legal notice"), ("en/legal-notice/#privacy", "Privacy"), ("en/legal-notice/#cookies", "Cookies")],
         "funding": "Global Nautica has received European Union funding from the NextGenerationEU Fund, under the Recovery, Transformation and Resilience Plan, for the purchase of a plug-in electric vehicle within the MOVES III Andalucía programme of the Spanish Ministry for the Ecological Transition and the Demographic Challenge, managed by the Junta de Andalucía through the Andalusian Energy Agency.",
         "locale": "en_GB",
     },
@@ -156,6 +156,8 @@ def layout(p):
     )
     services = "\n".join(f'          <li><a href="{link(r, u)}">{label}</a></li>' for u, label in t["services"])
     company = "\n".join(f'          <li><a href="{anchor(a)}">{label}</a></li>' for a, label in t["nav"] if a not in ("servicios", "services"))
+    legal = "\n".join(f'          <li><a href="{link(r, u)}">{label}</a></li>' for u, label in t["legal"])
+    legal_inline = " · ".join(f'<a href="{link(r, u)}">{label}</a>' for u, label in t["legal"])
     robots = '  <meta name="robots" content="noindex">\n' if NOINDEX else ""
     image = SITE + p.get("image", "assets/img/cabos-cubierta.jpg")
     body = p["body"].replace("{{R}}", r)
@@ -180,9 +182,7 @@ def layout(p):
   <meta property="og:url" content="{canonical}">
   <meta property="og:image" content="{image}">
 
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{r}assets/css/fonts.css">
   <link rel="stylesheet" href="{r}assets/css/styles.css">
   <script>document.documentElement.classList.add("js");</script>
 {ld}
@@ -239,7 +239,7 @@ def layout(p):
         <p class="footer-title">{t['footer_company']}</p>
         <ul class="footer-links">
 {company}
-          <li><a href="{r}aviso-legal.html">{t['legal']}</a></li>
+{legal}
         </ul>
       </nav>
       <div class="footer-contact">
@@ -258,7 +258,7 @@ def layout(p):
 
     <div class="container footer-bottom">
       <span>© <span data-year>2026</span> Global Nautica Marine SL · Estepona (Málaga), España</span>
-      {switch}
+      <span class="footer-legal">{legal_inline} · {switch}</span>
     </div>
   </footer>
 
@@ -278,7 +278,6 @@ def sitemap(pages):
             f'\n    <xhtml:link rel="alternate" hreflang="{lg}" href="{u}"/>' for lg, u in alts
         )
         rows.append(f"  <url>\n    <loc>{SITE + p['path']}</loc>{links}\n  </url>")
-    rows.append(f"  <url>\n    <loc>{SITE}aviso-legal.html</loc>\n  </url>")
     return (
         '<?xml version="1.0" encoding="UTF-8"?>\n'
         '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" '

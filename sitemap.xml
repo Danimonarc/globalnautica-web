@@ -1,9 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">
   <url>
+    <loc>https://www.globalnautica.com/aviso-legal/</loc>
+    <xhtml:link rel="alternate" hreflang="es" href="https://www.globalnautica.com/aviso-legal/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.globalnautica.com/en/legal-notice/"/>
+  </url>
+  <url>
     <loc>https://www.globalnautica.com/en/</loc>
     <xhtml:link rel="alternate" hreflang="en" href="https://www.globalnautica.com/en/"/>
     <xhtml:link rel="alternate" hreflang="es" href="https://www.globalnautica.com/"/>
+  </url>
+  <url>
+    <loc>https://www.globalnautica.com/en/legal-notice/</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.globalnautica.com/en/legal-notice/"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://www.globalnautica.com/aviso-legal/"/>
   </url>
   <url>
     <loc>https://www.globalnautica.com/en/marine-surveyor-costa-del-sol/</loc>
@@ -39,8 +49,5 @@
     <loc>https://www.globalnautica.com/servicios-tecnicos/</loc>
     <xhtml:link rel="alternate" hreflang="es" href="https://www.globalnautica.com/servicios-tecnicos/"/>
     <xhtml:link rel="alternate" hreflang="en" href="https://www.globalnautica.com/en/marine-surveyor-costa-del-sol/"/>
-  </url>
-  <url>
-    <loc>https://www.globalnautica.com/aviso-legal.html</loc>
   </url>
 </urlset>
