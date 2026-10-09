@@ -26,6 +26,12 @@ SITE = "https://www.globalnautica.com/"
 # no queremos que Google la indexe. Poner a False al publicar en el dominio real.
 NOINDEX = True
 
+# Las guías (_src/guias/ y _src/en/guides/) están ocultas hasta que se revisen.
+# Con False no se generan, y se quitan sus enlaces del menú, el pie, la portada y
+# los servicios (los bloques marcados con <!-- guides --> ... <!-- /guides -->).
+SHOW_GUIDES = False
+GUIDE_PATHS = ("guias/", "en/guides/")
+
 T = {
     "es": {
         "skip": "Saltar al contenido",
@@ -326,7 +332,10 @@ def layout(p, pages):
 
     guides_li = f'          <li><a href="{link(r, t["guides"][0])}">{t["guides"][1]}</a></li>'
     nav_items = [f'          <li><a href="{anchor(a)}">{label}</a></li>' for a, label in t["nav"]]
-    nav_items.insert(2, guides_li)  # Quiénes somos, Servicios, Guías, Recursos, Contacto
+    if SHOW_GUIDES:
+        nav_items.insert(2, guides_li)  # Quiénes somos, Servicios, Guías, Recursos, Contacto
+    else:
+        guides_li = ""
     nav = "\n".join(nav_items)
     switch_href = link(r, p["alt"]) if "alt" in p else link(r, T[alt_lang]["home"])
     # Selector ES | EN: el idioma actual marcado y el otro enlazando a la página equivalente
@@ -347,7 +356,9 @@ def layout(p, pages):
       <button type="button" class="lang-suggest-close" data-lang-suggest-close aria-label="{other[2]}">×</button>
     </div>
   </div>"""
-    services = "\n".join(f'          <li><a href="{link(r, u)}">{label}</a></li>' for u, label in t["services"]) + "\n" + guides_li
+    services = "\n".join(f'          <li><a href="{link(r, u)}">{label}</a></li>' for u, label in t["services"])
+    if guides_li:
+        services += "\n" + guides_li
     company = "\n".join(f'          <li><a href="{anchor(a)}">{label}</a></li>' for a, label in t["nav"] if a not in ("servicios", "services"))
     legal = "\n".join(f'          <li><a href="{link(r, u)}">{label}</a></li>' for u, label in t["legal"])
     legal_inline = " · ".join(f'<a href="{link(r, u)}">{label}</a>' for u, label in t["legal"])
@@ -360,6 +371,8 @@ def layout(p, pages):
         body = (p["body"]
                 .replace("{{GUIDES}}", guide_cards(guides, r, p["lang"]))
                 .replace("{{GUIDES_LATEST}}", guide_cards(guides[:3], r, p["lang"])))
+    guides_block = re.compile(r"[ \t]*<!-- guides -->.*?<!-- /guides -->\n?", re.S)
+    body = guides_block.sub("", body) if not SHOW_GUIDES else body.replace("<!-- guides -->\n", "").replace("<!-- /guides -->\n", "")
     body = body.replace("{{R}}", r)
     og_type = "article" if is_article else "website"
 
@@ -490,6 +503,16 @@ def sitemap(pages):
 
 def main():
     pages = [parse(f) for f in sorted(SRC.rglob("*.html"))]
+    if not SHOW_GUIDES:
+        pages = [p for p in pages if not p["path"].startswith(GUIDE_PATHS)]
+        # Borrar las guías generadas en una ejecución anterior
+        for d in GUIDE_PATHS:
+            for f in sorted((ROOT / d).rglob("index.html"), reverse=True):
+                f.unlink()
+                for parent in f.parents:
+                    if parent == ROOT or any(parent.iterdir()):
+                        break
+                    parent.rmdir()
     for p in pages:
         out = ROOT / p["path"] / "index.html"
         out.parent.mkdir(parents=True, exist_ok=True)

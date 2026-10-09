@@ -36,6 +36,8 @@ assets/                       CSS, JS e imágenes
 
 ## Cómo añadir una guía (artículo)
 
+> **Ahora mismo las guías están ocultas** (`SHOW_GUIDES = False` en `build.py`): no se generan ni se enlazan desde ningún sitio. Para publicarlas, ponlo a `True` y ejecuta `python build.py`. En los fragmentos, lo que enlaza a guías va entre `<!-- guides -->` y `<!-- /guides -->`, para que se pueda quitar.
+
 1. Copia un archivo de `_src/guias/` (o de `_src/en/guides/` para inglés) y cambia los metadatos de arriba:
 
    ```
