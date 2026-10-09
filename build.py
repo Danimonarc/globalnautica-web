@@ -30,6 +30,10 @@ T = {
         "services": [("fiscalidad-nautica/", "Fiscalidad náutica"), ("gestoria-nautica/", "Gestoría náutica"), ("servicios-tecnicos/", "Servicios técnicos")],
         "home": "",
         "switch": ("EN", "English", "en"),
+        "lang_group": "Idioma",
+        "suggest": ("Esta página también está disponible en español.", "Ver en español", "Cerrar"),
+        "country": "España",
+        "funding_alt": "Ministerio para la Transición Ecológica y el Reto Demográfico, IDAE, MOVES III, Junta de Andalucía, Agencia Andaluza de la Energía",
         "tag": "Asesoría náutica integral en la Costa del Sol desde 1999.",
         "footer_services": "Servicios",
         "footer_company": "Empresa",
@@ -45,6 +49,10 @@ T = {
         "services": [("en/yacht-tax-vat-spain/", "Yacht tax & VAT"), ("en/yacht-registration-spain/", "Yacht registration"), ("en/marine-surveyor-costa-del-sol/", "Surveys & technical")],
         "home": "en/",
         "switch": ("ES", "Español", "es"),
+        "lang_group": "Language",
+        "suggest": ("This page is also available in English.", "View in English", "Close"),
+        "country": "Spain",
+        "funding_alt": "Spanish Ministry for the Ecological Transition, IDAE, MOVES III, Junta de Andalucía, Andalusian Energy Agency",
         "tag": "Full-service nautical consultancy on the Costa del Sol since 1999.",
         "footer_services": "Services",
         "footer_company": "Company",
@@ -150,10 +158,24 @@ def layout(p):
 
     nav = "\n".join(f'          <li><a href="{anchor(a)}">{label}</a></li>' for a, label in t["nav"])
     switch_href = link(r, p["alt"]) if "alt" in p else link(r, T[alt_lang]["home"])
-    switch = (
-        f'<a class="lang-switch" href="{switch_href}" hreflang="{alt_lang}" lang="{alt_lang}" '
-        f'title="{t["switch"][1]}">{t["switch"][0]}</a>'
-    )
+    # Selector ES | EN: el idioma actual marcado y el otro enlazando a la página equivalente
+    hrefs = {p["lang"]: link(r, path), alt_lang: switch_href}
+    lang_names = {"es": "Español", "en": "English"}
+    links = []
+    for lg in ("es", "en"):
+        state = ' aria-current="true"' if lg == p["lang"] else f' title="{lang_names[lg]}"'
+        links.append(f'<a href="{hrefs[lg]}" hreflang="{lg}" lang="{lg}"{state}>{lg.upper()}</a>')
+    switch = f'<div class="lang-select" role="group" aria-label="{t["lang_group"]}">{"".join(links)}</div>'
+
+    # Aviso para quien tiene el navegador en el otro idioma (lo muestra main.js)
+    other = T[alt_lang]["suggest"]
+    suggest = f"""<div class="lang-suggest" data-lang-suggest="{alt_lang}" lang="{alt_lang}" hidden>
+    <div class="container lang-suggest-inner">
+      <span>{other[0]}</span>
+      <a class="btn btn-small btn-brass" href="{switch_href}" hreflang="{alt_lang}">{other[1]}</a>
+      <button type="button" class="lang-suggest-close" data-lang-suggest-close aria-label="{other[2]}">×</button>
+    </div>
+  </div>"""
     services = "\n".join(f'          <li><a href="{link(r, u)}">{label}</a></li>' for u, label in t["services"])
     company = "\n".join(f'          <li><a href="{anchor(a)}">{label}</a></li>' for a, label in t["nav"] if a not in ("servicios", "services"))
     legal = "\n".join(f'          <li><a href="{link(r, u)}">{label}</a></li>' for u, label in t["legal"])
@@ -189,6 +211,7 @@ def layout(p):
 </head>
 <body>
   <a class="skip-link" href="#contenido">{t['skip']}</a>
+  {suggest}
 
   <!-- Archivo generado por build.py a partir de _src/. No editar a mano. -->
   <header class="site-header" data-header>
@@ -252,13 +275,14 @@ def layout(p):
     </div>
 
     <div class="container funding">
-      <img src="{r}assets/img/logos-moves-iii.png" alt="Ministerio para la Transición Ecológica, IDAE, MOVES III, Junta de Andalucía, Agencia Andaluza de la Energía" width="944" height="63" loading="lazy">
+      <img src="{r}assets/img/logos-moves-iii.png" alt="{t['funding_alt']}" width="944" height="63" loading="lazy">
       <p>{t['funding']}</p>
     </div>
 
     <div class="container footer-bottom">
-      <span>© <span data-year>2026</span> Global Nautica Marine SL · Estepona (Málaga), España</span>
-      <span class="footer-legal">{legal_inline} · {switch}</span>
+      <span>© <span data-year>2026</span> Global Nautica Marine SL · Estepona (Málaga), {t['country']}</span>
+      <span class="footer-legal">{legal_inline}</span>
+      {switch}
     </div>
   </footer>
 

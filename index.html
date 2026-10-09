@@ -28,6 +28,13 @@
 </head>
 <body>
   <a class="skip-link" href="#contenido">Saltar al contenido</a>
+  <div class="lang-suggest" data-lang-suggest="en" lang="en" hidden>
+    <div class="container lang-suggest-inner">
+      <span>This page is also available in English.</span>
+      <a class="btn btn-small btn-brass" href="en/" hreflang="en">View in English</a>
+      <button type="button" class="lang-suggest-close" data-lang-suggest-close aria-label="Close">×</button>
+    </div>
+  </div>
 
   <!-- Archivo generado por build.py a partir de _src/. No editar a mano. -->
   <header class="site-header" data-header>
@@ -49,7 +56,7 @@
           <li><a href="#recursos">Recursos</a></li>
           <li><a href="#contacto">Contacto</a></li>
         </ul>
-        <a class="lang-switch" href="en/" hreflang="en" lang="en" title="English">EN</a>
+        <div class="lang-select" role="group" aria-label="Idioma"><a href="./" hreflang="es" lang="es" aria-current="true">ES</a><a href="en/" hreflang="en" lang="en" title="English">EN</a></div>
         <a class="btn btn-small btn-brass" href="tel:+34952808606">
           <svg aria-hidden="true" viewBox="0 0 24 24" width="16" height="16"><path fill="currentColor" d="M6.6 10.8a15.2 15.2 0 0 0 6.6 6.6l2.2-2.2a1 1 0 0 1 1-.25 11.4 11.4 0 0 0 3.6.57 1 1 0 0 1 1 1V20a1 1 0 0 1-1 1A17 17 0 0 1 3 4a1 1 0 0 1 1-1h3.5a1 1 0 0 1 1 1c0 1.25.2 2.45.57 3.57a1 1 0 0 1-.25 1z"/></svg>
           952 808 606
@@ -363,13 +370,14 @@
     </div>
 
     <div class="container funding">
-      <img src="assets/img/logos-moves-iii.png" alt="Ministerio para la Transición Ecológica, IDAE, MOVES III, Junta de Andalucía, Agencia Andaluza de la Energía" width="944" height="63" loading="lazy">
+      <img src="assets/img/logos-moves-iii.png" alt="Ministerio para la Transición Ecológica y el Reto Demográfico, IDAE, MOVES III, Junta de Andalucía, Agencia Andaluza de la Energía" width="944" height="63" loading="lazy">
       <p>Global Nautica ha recibido una ayuda de la Unión Europea con cargo al Fondo NextGenerationEU, en el marco del Plan de Recuperación, Transformación y Resiliencia, para la adquisición de vehículo eléctrico enchufable dentro del Programa de incentivos a la movilidad eficiente y sostenible (Programa MOVES III Andalucía) del Ministerio para la Transición Ecológica y el Reto Demográfico, gestionado por la Junta de Andalucía, a través de la Agencia Andaluza de la Energía.</p>
     </div>
 
     <div class="container footer-bottom">
       <span>© <span data-year>2026</span> Global Nautica Marine SL · Estepona (Málaga), España</span>
-      <span class="footer-legal"><a href="aviso-legal/">Aviso legal</a> · <a href="aviso-legal/#privacidad">Privacidad</a> · <a href="aviso-legal/#cookies">Cookies</a> · <a class="lang-switch" href="en/" hreflang="en" lang="en" title="English">EN</a></span>
+      <span class="footer-legal"><a href="aviso-legal/">Aviso legal</a> · <a href="aviso-legal/#privacidad">Privacidad</a> · <a href="aviso-legal/#cookies">Cookies</a></span>
+      <div class="lang-select" role="group" aria-label="Idioma"><a href="./" hreflang="es" lang="es" aria-current="true">ES</a><a href="en/" hreflang="en" lang="en" title="English">EN</a></div>
     </div>
   </footer>
 

@@ -107,12 +107,39 @@
     mapBtn.addEventListener("click", function () {
       var iframe = document.createElement("iframe");
       iframe.src = "https://maps.google.com/maps?q=36.4170574,-5.1562526&z=17&output=embed";
-      iframe.title = "Ubicación de Global Nautica en Estepona";
+      iframe.title = document.documentElement.lang === "en"
+        ? "Global Nautica location in Estepona"
+        : "Ubicación de Global Nautica en Estepona";
       iframe.loading = "lazy";
       iframe.referrerPolicy = "no-referrer-when-downgrade";
       mapCard.appendChild(iframe);
       mapCard.classList.add("is-loaded");
     });
+  }
+
+  // Sugerir la otra versión de idioma si el navegador está en ese idioma.
+  // Nunca redirige: solo muestra un aviso que se puede cerrar (y se recuerda).
+  var suggest = document.querySelector("[data-lang-suggest]");
+  if (suggest) {
+    var target = suggest.getAttribute("data-lang-suggest");
+    var key = "gn-lang-suggest-dismissed";
+    var prefs = navigator.languages && navigator.languages.length ? navigator.languages : [navigator.language || ""];
+    var preferred = String(prefs[0] || "").toLowerCase().slice(0, 2);
+    var dismissed = false;
+    try { dismissed = localStorage.getItem(key) === "1"; } catch (e) {}
+    if (preferred === target && !dismissed) {
+      suggest.hidden = false;
+      document.body.classList.add("has-lang-suggest");
+    }
+    function remember() {
+      try { localStorage.setItem(key, "1"); } catch (e) {}
+    }
+    suggest.querySelector("[data-lang-suggest-close]").addEventListener("click", function () {
+      suggest.hidden = true;
+      document.body.classList.remove("has-lang-suggest");
+      remember();
+    });
+    suggest.querySelector("a").addEventListener("click", remember);
   }
 
   // Año del copyright

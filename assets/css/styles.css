@@ -345,12 +345,32 @@ p { margin: 0 0 1em; }
 }
 
 /* ---------- Selector de idioma ---------- */
-.lang-switch {
-  font-size: .82rem; font-weight: 600; letter-spacing: .08em; text-decoration: none;
-  padding: 6px 10px; border-radius: 8px; border: 1px solid rgba(255, 255, 255, .3); opacity: .9;
+.lang-select {
+  display: inline-flex; padding: 3px; border-radius: 999px; border: 1px solid rgba(255, 255, 255, .25);
 }
-.lang-switch:hover { border-color: var(--brass); color: var(--brass); }
-.footer-bottom .lang-switch { border-color: rgba(255, 255, 255, .2); }
+.lang-select a {
+  font-size: .78rem; font-weight: 600; letter-spacing: .08em; text-decoration: none;
+  padding: 5px 10px; border-radius: 999px; opacity: .75; transition: background-color .2s ease, opacity .2s ease;
+}
+.lang-select a:hover { opacity: 1; }
+.lang-select a[aria-current="true"] { background: var(--white); color: var(--navy); opacity: 1; }
+
+/* Aviso de idioma sugerido (encima de la cabecera) */
+.lang-suggest {
+  position: fixed; inset: 0 0 auto; z-index: 60; height: 52px;
+  background: var(--brass); color: var(--navy-950); font-size: .92rem; font-weight: 500;
+}
+.lang-suggest[hidden] { display: none; }
+.lang-suggest-inner { height: 100%; display: flex; align-items: center; justify-content: center; gap: 16px; }
+.lang-suggest .btn-brass { background: var(--navy); color: var(--white); padding: .55em 1em; }
+.lang-suggest .btn-brass:hover { background: var(--navy-600); }
+.lang-suggest-close {
+  border: 0; background: transparent; color: inherit; font-size: 1.5rem; line-height: 1; cursor: pointer;
+  width: 36px; height: 36px; border-radius: 50%;
+}
+.lang-suggest-close:hover { background: rgba(0, 0, 0, .08); }
+.has-lang-suggest .site-header { top: 52px; }
+.has-lang-suggest .hero, .has-lang-suggest .page-hero { margin-top: 52px; }
 
 /* ---------- Páginas de servicio ---------- */
 .page-hero {
@@ -509,5 +529,8 @@ p { margin: 0 0 1em; }
   .data-table th { border-bottom: 0; padding-bottom: 4px; }
   .related { grid-template-columns: 1fr; }
   .page-hero { padding: calc(var(--header-h) + 32px) 0 56px; }
-  .main-nav .lang-switch { align-self: flex-start; }
+  .main-nav .lang-select { align-self: flex-start; }
+  .lang-suggest { height: auto; min-height: 52px; padding: 8px 0; }
+  .lang-suggest-inner { justify-content: space-between; gap: 10px; font-size: .85rem; }
+  .has-lang-suggest .main-nav { top: calc(var(--header-h) + 52px); }
 }
