@@ -6,6 +6,36 @@
     <xhtml:link rel="alternate" hreflang="en" href="https://www.globalnautica.com/en/legal-notice/"/>
   </url>
   <url>
+    <loc>https://www.globalnautica.com/en/guides/buying-a-used-boat-in-spain/</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.globalnautica.com/en/guides/buying-a-used-boat-in-spain/"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://www.globalnautica.com/guias/comprar-barco-segunda-mano-espana/"/>
+  </url>
+  <url>
+    <loc>https://www.globalnautica.com/en/guides/can-i-charter-my-boat-in-spain/</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.globalnautica.com/en/guides/can-i-charter-my-boat-in-spain/"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://www.globalnautica.com/guias/lista-6-o-lista-7-alquilar-mi-barco/"/>
+  </url>
+  <url>
+    <loc>https://www.globalnautica.com/en/guides/cost-to-register-a-boat-in-spain/</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.globalnautica.com/en/guides/cost-to-register-a-boat-in-spain/"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://www.globalnautica.com/guias/cuanto-cuesta-matricular-un-barco-en-espana/"/>
+  </url>
+  <url>
+    <loc>https://www.globalnautica.com/en/guides/</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.globalnautica.com/en/guides/"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://www.globalnautica.com/guias/"/>
+  </url>
+  <url>
+    <loc>https://www.globalnautica.com/en/guides/living-in-spain-foreign-flagged-boat/</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.globalnautica.com/en/guides/living-in-spain-foreign-flagged-boat/"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://www.globalnautica.com/guias/residente-en-espana-barco-bandera-extranjera/"/>
+  </url>
+  <url>
+    <loc>https://www.globalnautica.com/en/guides/temporary-admission-yachts-spain/</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.globalnautica.com/en/guides/temporary-admission-yachts-spain/"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://www.globalnautica.com/guias/importacion-temporal-embarcaciones-espana/"/>
+  </url>
+  <url>
     <loc>https://www.globalnautica.com/en/</loc>
     <xhtml:link rel="alternate" hreflang="en" href="https://www.globalnautica.com/en/"/>
     <xhtml:link rel="alternate" hreflang="es" href="https://www.globalnautica.com/"/>
@@ -39,6 +69,36 @@
     <loc>https://www.globalnautica.com/gestoria-nautica/</loc>
     <xhtml:link rel="alternate" hreflang="es" href="https://www.globalnautica.com/gestoria-nautica/"/>
     <xhtml:link rel="alternate" hreflang="en" href="https://www.globalnautica.com/en/yacht-registration-spain/"/>
+  </url>
+  <url>
+    <loc>https://www.globalnautica.com/guias/comprar-barco-segunda-mano-espana/</loc>
+    <xhtml:link rel="alternate" hreflang="es" href="https://www.globalnautica.com/guias/comprar-barco-segunda-mano-espana/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.globalnautica.com/en/guides/buying-a-used-boat-in-spain/"/>
+  </url>
+  <url>
+    <loc>https://www.globalnautica.com/guias/cuanto-cuesta-matricular-un-barco-en-espana/</loc>
+    <xhtml:link rel="alternate" hreflang="es" href="https://www.globalnautica.com/guias/cuanto-cuesta-matricular-un-barco-en-espana/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.globalnautica.com/en/guides/cost-to-register-a-boat-in-spain/"/>
+  </url>
+  <url>
+    <loc>https://www.globalnautica.com/guias/importacion-temporal-embarcaciones-espana/</loc>
+    <xhtml:link rel="alternate" hreflang="es" href="https://www.globalnautica.com/guias/importacion-temporal-embarcaciones-espana/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.globalnautica.com/en/guides/temporary-admission-yachts-spain/"/>
+  </url>
+  <url>
+    <loc>https://www.globalnautica.com/guias/</loc>
+    <xhtml:link rel="alternate" hreflang="es" href="https://www.globalnautica.com/guias/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.globalnautica.com/en/guides/"/>
+  </url>
+  <url>
+    <loc>https://www.globalnautica.com/guias/lista-6-o-lista-7-alquilar-mi-barco/</loc>
+    <xhtml:link rel="alternate" hreflang="es" href="https://www.globalnautica.com/guias/lista-6-o-lista-7-alquilar-mi-barco/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.globalnautica.com/en/guides/can-i-charter-my-boat-in-spain/"/>
+  </url>
+  <url>
+    <loc>https://www.globalnautica.com/guias/residente-en-espana-barco-bandera-extranjera/</loc>
+    <xhtml:link rel="alternate" hreflang="es" href="https://www.globalnautica.com/guias/residente-en-espana-barco-bandera-extranjera/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.globalnautica.com/en/guides/living-in-spain-foreign-flagged-boat/"/>
   </url>
   <url>
     <loc>https://www.globalnautica.com/</loc>

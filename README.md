@@ -25,13 +25,36 @@ _src/                         Contenido de cada página (esto es lo que se edita
   fiscalidad-nautica.html     -> /fiscalidad-nautica/
   gestoria-nautica.html       -> /gestoria-nautica/
   servicios-tecnicos.html     -> /servicios-tecnicos/
-  en/                         Versión en inglés (/en/, /en/yacht-tax-vat-spain/...)
+  aviso-legal.html            -> /aviso-legal/ (aviso legal, privacidad y cookies)
+  guias/                      Guías (artículos) en español -> /guias/...
+  en/                         Versión en inglés (/en/, /en/guides/...)
 build.py                      Genera las páginas, el sitemap.xml y las etiquetas hreflang
-aviso-legal.html              Aviso legal (editado a mano)
 .htaccess                     Redirecciones 301 para el hosting de IONOS (https, www y URLs antiguas)
 robots.txt, sitemap.xml       Para los buscadores
 assets/                       CSS, JS e imágenes
 ```
+
+## Cómo añadir una guía (artículo)
+
+1. Copia un archivo de `_src/guias/` (o de `_src/en/guides/` para inglés) y cambia los metadatos de arriba:
+
+   ```
+   lang: es
+   type: article
+   path: guias/mi-nueva-guia/                  URL de la guía
+   alt: en/guides/my-new-guide/                su versión en el otro idioma
+   date: 2026-11-15                            fecha de publicación o actualización
+   order: 1                                    opcional: orden entre guías de la misma fecha
+   category: Fiscalidad                        etiqueta que se muestra en la tarjeta
+   topic_service: fiscalidad-nautica/          página de servicio relacionada
+   headline: Título visible (H1)
+   summary: Entradilla y texto de la tarjeta
+   title: Título para Google (unos 60 caracteres)
+   description: Descripción para Google (unos 155 caracteres)
+   ```
+
+2. Escribe solo el texto del artículo (párrafos, `<h2>`, listas, preguntas frecuentes...). La cabecera, el contacto lateral, las guías relacionadas, los datos estructurados y el tiempo de lectura los añade `build.py`.
+3. Ejecuta `python build.py`. La guía aparece sola en el índice de guías, en la portada (si es de las tres más recientes) y en el `sitemap.xml`.
 
 ## SEO
 

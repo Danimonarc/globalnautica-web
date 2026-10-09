@@ -7,7 +7,12 @@ de metadatos entre <!-- -->. Este script le añade la plantilla común
     python build.py
 
 Marcadores disponibles en los fragmentos:
-    {{R}}     prefijo relativo hasta la raíz del sitio ("", "../", "../../")
+    {{R}}              prefijo relativo hasta la raíz del sitio ("", "../", "../../")
+    {{GUIDES}}         tarjetas de todas las guías del idioma de la página
+    {{GUIDES_LATEST}}  tarjetas de las tres guías más recientes
+
+Los artículos (type: article) solo contienen el texto: la cabecera, el
+contacto lateral y las guías relacionadas los añade article_body().
 """
 import json
 import re
@@ -40,6 +45,28 @@ T = {
         "legal": [("aviso-legal/", "Aviso legal"), ("aviso-legal/#privacidad", "Privacidad"), ("aviso-legal/#cookies", "Cookies")],
         "funding": "Global Nautica ha recibido una ayuda de la Unión Europea con cargo al Fondo NextGenerationEU, en el marco del Plan de Recuperación, Transformación y Resiliencia, para la adquisición de vehículo eléctrico enchufable dentro del Programa de incentivos a la movilidad eficiente y sostenible (Programa MOVES III Andalucía) del Ministerio para la Transición Ecológica y el Reto Demográfico, gestionado por la Junta de Andalucía, a través de la Agencia Andaluza de la Energía.",
         "locale": "es_ES",
+        "guides": ("guias/", "Guías"),
+        "months": ["enero", "febrero", "marzo", "abril", "mayo", "junio", "julio", "agosto",
+                   "septiembre", "octubre", "noviembre", "diciembre"],
+        "date_fmt": "{d} de {m} de {y}",
+        "a": {
+            "home": "Inicio",
+            "updated": "Actualizado el",
+            "read": "min de lectura",
+            "author": "Equipo de Global Nautica",
+            "read_more": "Leer guía",
+            "disclaimer": "Esta guía tiene carácter informativo y general, y refleja la normativa a la fecha de actualización. Cada caso requiere un estudio individual: consúltenos antes de tomar decisiones.",
+            "side_eyebrow": "¿Le ayudamos?",
+            "side_title": "Estudiamos su caso",
+            "side_text": "Desde 1999 resolvemos estas gestiones en Estepona para clientes de toda España.",
+            "subject": "Consulta desde la guía",
+            "service_label": "Servicio relacionado",
+            "more": "Más guías",
+            "more_title": "Siga leyendo",
+            "cta_title": "¿Tiene dudas sobre su caso?",
+            "cta_text": "Teléfono, email o WhatsApp. También puede visitarnos en el edificio Puertosol, en Estepona.",
+            "email_btn": "Escribir un email",
+        },
     },
     "en": {
         "skip": "Skip to content",
@@ -59,6 +86,28 @@ T = {
         "legal": [("en/legal-notice/", "Legal notice"), ("en/legal-notice/#privacy", "Privacy"), ("en/legal-notice/#cookies", "Cookies")],
         "funding": "Global Nautica has received European Union funding from the NextGenerationEU Fund, under the Recovery, Transformation and Resilience Plan, for the purchase of a plug-in electric vehicle within the MOVES III Andalucía programme of the Spanish Ministry for the Ecological Transition and the Demographic Challenge, managed by the Junta de Andalucía through the Andalusian Energy Agency.",
         "locale": "en_GB",
+        "guides": ("en/guides/", "Guides"),
+        "months": ["January", "February", "March", "April", "May", "June", "July", "August",
+                   "September", "October", "November", "December"],
+        "date_fmt": "{d} {m} {y}",
+        "a": {
+            "home": "Home",
+            "updated": "Updated",
+            "read": "min read",
+            "author": "Global Nautica team",
+            "read_more": "Read guide",
+            "disclaimer": "This guide is general information and reflects the rules in force on the date it was updated. Every case needs individual advice: talk to us before making decisions.",
+            "side_eyebrow": "Need help?",
+            "side_title": "We'll review your case",
+            "side_text": "Since 1999 we have handled these procedures from Estepona for owners from all over the world.",
+            "subject": "Enquiry from the guide",
+            "service_label": "Related service",
+            "more": "More guides",
+            "more_title": "Keep reading",
+            "cta_title": "Questions about your case?",
+            "cta_text": "Phone, email or WhatsApp. You are also welcome at our office in the Puertosol building, Estepona.",
+            "email_btn": "Send an email",
+        },
     },
 }
 
@@ -114,10 +163,111 @@ def link(r, target):
     return (r + target) or "./"
 
 
-def layout(p):
+def fmt_date(iso, lang):
+    t = T[lang]
+    y, m, d = (int(x) for x in iso.split("-"))
+    return t["date_fmt"].format(d=d, m=t["months"][m - 1], y=y)
+
+
+def reading_minutes(html):
+    words = len(re.sub(r"<[^>]+>", " ", html).split())
+    return max(3, round(words / 200))
+
+
+def guides_of(pages, lang):
+    """Artículos de un idioma, del más reciente al más antiguo."""
+    arts = [g for g in pages if g.get("type") == "article" and g["lang"] == lang]
+    # Más recientes primero; a igual fecha, por el campo opcional "order" (1 = primero)
+    arts.sort(key=lambda g: int(g.get("order", 99)))
+    return sorted(arts, key=lambda g: g["date"], reverse=True)
+
+
+def guide_cards(guides, r, lang):
+    a = T[lang]["a"]
+    cards = []
+    for g in guides:
+        cards.append(
+            f'          <a class="guide-card" href="{link(r, g["path"])}">\n'
+            f'            <span class="guide-cat">{g["category"]}</span>\n'
+            f'            <h3>{g["headline"]}</h3>\n'
+            f'            <p>{g["summary"]}</p>\n'
+            f'            <span class="guide-meta">{reading_minutes(g["body"])} {a["read"]} · {a["read_more"]} →</span>\n'
+            f'          </a>'
+        )
+    return '        <div class="guides-grid">\n' + "\n".join(cards) + "\n        </div>"
+
+
+def article_body(p, pages, r):
+    """Envuelve el texto de un artículo con su cabecera, contacto lateral y guías relacionadas."""
+    lang = p["lang"]
+    t = T[lang]
+    a = t["a"]
+    guides_path, guides_label = t["guides"]
+    service_label = dict(t["services"]).get(p.get("topic_service", ""), "")
+    service_link = (
+        f'\n          <a class="side-service" href="{link(r, p["topic_service"])}">{a["service_label"]}: <strong>{service_label}</strong> →</a>'
+        if service_label else ""
+    )
+    others = [g for g in guides_of(pages, lang) if g["path"] != p["path"]][:3]
+    subject = a["subject"].replace(" ", "%20")
+    return f"""    <section class="page-hero article-hero">
+      <div class="container">
+        <nav class="breadcrumb" aria-label="{'Ruta' if lang == 'es' else 'Breadcrumb'}"><a href="{link(r, t['home'])}">{a['home']}</a> <span aria-hidden="true">/</span> <a href="{link(r, guides_path)}">{guides_label}</a> <span aria-hidden="true">/</span> <span>{p['category']}</span></nav>
+        <p class="eyebrow">{p['category']}</p>
+        <h1>{p['headline']}</h1>
+        <p class="lead">{p['summary']}</p>
+        <p class="article-meta">{a['updated']} <time datetime="{p['date']}">{fmt_date(p['date'], lang)}</time> · {reading_minutes(p['body'])} {a['read']} · {a['author']}</p>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="container article-grid">
+        <article class="prose">
+{p['body'].rstrip()}
+          <p class="article-disclaimer">{a['disclaimer']}</p>
+        </article>
+
+        <aside class="side-card" aria-label="{a['side_eyebrow']}">
+          <p class="eyebrow">{a['side_eyebrow']}</p>
+          <p class="side-title">{a['side_title']}</p>
+          <p>{a['side_text']}</p>
+          <a class="btn btn-brass" href="mailto:info@globalnautica.com?subject={subject}">{a['email_btn']}</a>
+          <a class="btn btn-ghost-dark" href="https://wa.me/34637742113" target="_blank" rel="noopener">WhatsApp</a>
+          <a class="btn btn-ghost-dark" href="tel:+34952808606">+34 952 808 606</a>{service_link}
+        </aside>
+      </div>
+    </section>
+
+    <section class="section section-tint">
+      <div class="container">
+        <header class="section-head">
+          <p class="eyebrow">{a['more']}</p>
+          <h2>{a['more_title']}</h2>
+        </header>
+{guide_cards(others, r, lang)}
+      </div>
+    </section>
+
+    <section class="cta-band">
+      <div class="container cta-inner">
+        <div>
+          <h2>{a['cta_title']}</h2>
+          <p>{a['cta_text']}</p>
+        </div>
+        <div class="cta-actions">
+          <a class="btn btn-brass" href="tel:+34952808606">+34 952 808 606</a>
+          <a class="btn btn-ghost" href="mailto:info@globalnautica.com">info@globalnautica.com</a>
+        </div>
+      </div>
+    </section>
+"""
+
+
+def layout(p, pages):
     t = T[p["lang"]]
     path = p["path"]
     r = rel(depth_of(path))
+    is_article = p.get("type") == "article"
     is_home = path == t["home"]
     home = link(r, t["home"])
     anchor = (lambda a: "#" + a) if is_home else (lambda a: home + "#" + a)
@@ -143,20 +293,41 @@ def layout(p):
             "areaServed": ["Costa del Sol", "España"],
             "url": canonical,
         })
+    if is_article:
+        schema.append({
+            "@context": "https://schema.org",
+            "@type": "Article",
+            "headline": p["headline"],
+            "description": p["description"],
+            "inLanguage": p["lang"],
+            "datePublished": p["date"],
+            "dateModified": p.get("modified", p["date"]),
+            "author": {"@type": "Organization", "name": "Global Nautica", "url": SITE},
+            "publisher": {"@id": SITE + "#empresa"},
+            "mainEntityOfPage": canonical,
+            "image": SITE + p.get("image", "assets/img/cabos-cubierta.jpg"),
+        })
     if not is_home:
+        crumbs = [("Global Nautica", SITE + t["home"])]
+        if is_article:
+            crumbs.append((t["guides"][1], SITE + t["guides"][0]))
+        crumbs.append((p.get("headline") or p.get("service") or p["title"], canonical))
         schema.append({
             "@context": "https://schema.org",
             "@type": "BreadcrumbList",
             "itemListElement": [
-                {"@type": "ListItem", "position": 1, "name": "Global Nautica", "item": SITE + t["home"]},
-                {"@type": "ListItem", "position": 2, "name": p.get("service") or p["title"], "item": canonical},
+                {"@type": "ListItem", "position": i, "name": name, "item": url}
+                for i, (name, url) in enumerate(crumbs, 1)
             ],
         })
     ld = "\n".join(
         f'  <script type="application/ld+json">{json.dumps(s, ensure_ascii=False)}</script>' for s in schema
     )
 
-    nav = "\n".join(f'          <li><a href="{anchor(a)}">{label}</a></li>' for a, label in t["nav"])
+    guides_li = f'          <li><a href="{link(r, t["guides"][0])}">{t["guides"][1]}</a></li>'
+    nav_items = [f'          <li><a href="{anchor(a)}">{label}</a></li>' for a, label in t["nav"]]
+    nav_items.insert(2, guides_li)  # Quiénes somos, Servicios, Guías, Recursos, Contacto
+    nav = "\n".join(nav_items)
     switch_href = link(r, p["alt"]) if "alt" in p else link(r, T[alt_lang]["home"])
     # Selector ES | EN: el idioma actual marcado y el otro enlazando a la página equivalente
     hrefs = {p["lang"]: link(r, path), alt_lang: switch_href}
@@ -176,13 +347,21 @@ def layout(p):
       <button type="button" class="lang-suggest-close" data-lang-suggest-close aria-label="{other[2]}">×</button>
     </div>
   </div>"""
-    services = "\n".join(f'          <li><a href="{link(r, u)}">{label}</a></li>' for u, label in t["services"])
+    services = "\n".join(f'          <li><a href="{link(r, u)}">{label}</a></li>' for u, label in t["services"]) + "\n" + guides_li
     company = "\n".join(f'          <li><a href="{anchor(a)}">{label}</a></li>' for a, label in t["nav"] if a not in ("servicios", "services"))
     legal = "\n".join(f'          <li><a href="{link(r, u)}">{label}</a></li>' for u, label in t["legal"])
     legal_inline = " · ".join(f'<a href="{link(r, u)}">{label}</a>' for u, label in t["legal"])
     robots = '  <meta name="robots" content="noindex">\n' if NOINDEX else ""
     image = SITE + p.get("image", "assets/img/cabos-cubierta.jpg")
-    body = p["body"].replace("{{R}}", r)
+    if is_article:
+        body = article_body(p, pages, r)
+    else:
+        guides = guides_of(pages, p["lang"])
+        body = (p["body"]
+                .replace("{{GUIDES}}", guide_cards(guides, r, p["lang"]))
+                .replace("{{GUIDES_LATEST}}", guide_cards(guides[:3], r, p["lang"])))
+    body = body.replace("{{R}}", r)
+    og_type = "article" if is_article else "website"
 
     return f"""<!doctype html>
 <html lang="{p['lang']}">
@@ -196,7 +375,7 @@ def layout(p):
   <meta name="theme-color" content="#0b2a5e">
   <link rel="icon" href="{r}assets/img/favicon.svg" type="image/svg+xml">
 
-  <meta property="og:type" content="website">
+  <meta property="og:type" content="{og_type}">
   <meta property="og:site_name" content="Global Nautica">
   <meta property="og:locale" content="{t['locale']}">
   <meta property="og:title" content="{p['title']}">
@@ -314,7 +493,7 @@ def main():
     for p in pages:
         out = ROOT / p["path"] / "index.html"
         out.parent.mkdir(parents=True, exist_ok=True)
-        out.write_text(layout(p), encoding="utf-8", newline="\n")
+        out.write_text(layout(p, pages), encoding="utf-8", newline="\n")
         print("  ", out.relative_to(ROOT))
     (ROOT / "sitemap.xml").write_text(sitemap(pages), encoding="utf-8", newline="\n")
     print("   sitemap.xml")
