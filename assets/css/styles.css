@@ -146,7 +146,7 @@ p { margin: 0 0 1em; }
   background:
     radial-gradient(1200px 600px at 85% 10%, rgba(129, 148, 200, .28), transparent 60%),
     linear-gradient(160deg, var(--navy) 0%, var(--navy-950) 100%);
-  padding: calc(var(--header-h) + 72px) 0 120px;
+  padding: calc(var(--header-h) + 72px) 0 168px;
 }
 .hero-waves {
   position: absolute; left: 0; right: 0; bottom: 0; width: 100%; height: 220px;
@@ -171,13 +171,26 @@ p { margin: 0 0 1em; }
 }
 .quote-mark { display: block; font-size: 3rem; line-height: .6; color: var(--brass); font-style: normal; }
 
-/* ---------- Datos clave ---------- */
-.facts { background: var(--sand); border-bottom: 1px solid var(--line); }
-.facts-grid { display: grid; grid-template-columns: repeat(4, 1fr); }
-.fact { padding: 36px 24px; display: flex; flex-direction: column; gap: 4px; border-left: 1px solid var(--line); }
-.fact:first-child { border-left: 0; padding-left: 0; }
-.fact-num { font-family: var(--font-display); font-size: 2.2rem; font-weight: 600; color: var(--navy); line-height: 1.1; }
-.fact-label { font-size: .92rem; color: var(--muted); }
+/* ---------- Accesos a áreas (solapados con el hero) ---------- */
+.areas { position: relative; z-index: 2; margin-top: -88px; }
+.areas-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
+.area-card {
+  display: flex; flex-direction: column; padding: 32px 30px 28px;
+  background: var(--white); border-radius: var(--radius-lg); text-decoration: none;
+  box-shadow: 0 24px 50px -24px rgba(6, 21, 51, .4); border: 1px solid var(--line);
+  border-top: 3px solid var(--brass);
+  transition: transform .25s ease, box-shadow .25s ease;
+}
+.area-card:hover { transform: translateY(-6px); box-shadow: 0 32px 60px -24px rgba(6, 21, 51, .5); }
+.area-card svg {
+  width: 48px; height: 48px; padding: 11px; margin-bottom: 20px; border-radius: 12px;
+  background: var(--sand); fill: none; stroke: var(--navy); stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round;
+}
+.area-card h2 { font-size: 1.35rem; color: var(--navy); margin-bottom: .4em; }
+.area-card p { color: var(--muted); font-size: .96rem; flex: 1; }
+.area-more { font-weight: 600; font-size: .9rem; color: var(--brass-600); }
+.area-more span { display: inline-block; transition: transform .2s ease; }
+.area-card:hover .area-more span { transform: translateX(4px); }
 
 /* ---------- Secciones ---------- */
 .section { padding: 110px 0; }
@@ -338,7 +351,7 @@ p { margin: 0 0 1em; }
   html { scroll-behavior: auto; }
   .js .reveal { opacity: 1; transform: none; transition: none; }
   .tab-panel { animation: none; }
-  .btn:hover, .resource-card:hover { transform: none; }
+  .btn:hover, .resource-card:hover, .area-card:hover { transform: none; }
 }
 
 /* ---------- Responsive ---------- */
@@ -347,6 +360,8 @@ p { margin: 0 0 1em; }
   .tab-panel { grid-template-columns: 1fr; }
   .panel-media img { min-height: 0; aspect-ratio: 16 / 7; }
   .resources { grid-template-columns: 1fr; }
+  .areas-grid { gap: 16px; }
+  .area-card { padding: 26px 22px 22px; }
 }
 
 @media (max-width: 860px) {
@@ -369,10 +384,9 @@ p { margin: 0 0 1em; }
   .hero-media img, .about-media img { aspect-ratio: 4 / 3; }
   .hero-quote { left: 16px; bottom: -28px; }
   .about-badge { right: 16px; }
-  .facts-grid { grid-template-columns: 1fr 1fr; }
-  .fact { padding: 24px 16px; border-left: 0; border-top: 1px solid var(--line); }
-  .fact:first-child { padding-left: 16px; }
-  .fact:nth-child(-n+2) { border-top: 0; }
+  .areas { margin-top: 0; padding-top: 64px; }
+  .areas-grid { grid-template-columns: 1fr; gap: 16px; }
+  .area-card { padding: 24px 22px; }
   .section { padding: 80px 0; }
   .section-head { margin-bottom: 36px; }
   .tab-list { grid-template-columns: 1fr; border-radius: var(--radius); }

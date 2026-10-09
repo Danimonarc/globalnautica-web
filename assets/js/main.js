@@ -45,6 +45,12 @@
       });
       if (focus) tab.focus();
     }
+    // Tarjetas de la portada que abren directamente una pestaña
+    document.querySelectorAll("[data-open-tab]").forEach(function (link) {
+      var target = document.getElementById(link.getAttribute("data-open-tab"));
+      if (tabs.indexOf(target) === -1) return;
+      link.addEventListener("click", function () { select(target); });
+    });
     tabs.forEach(function (tab, i) {
       tab.addEventListener("click", function () { select(tab); });
       tab.addEventListener("keydown", function (e) {
