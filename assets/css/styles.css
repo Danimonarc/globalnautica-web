@@ -366,7 +366,7 @@ p { margin: 0 0 1em; }
 
   .hero { padding: calc(var(--header-h) + 40px) 0 96px; }
   .hero-grid, .about-grid, .contact-grid { grid-template-columns: 1fr; }
-  .hero-media img { aspect-ratio: 4 / 3; }
+  .hero-media img, .about-media img { aspect-ratio: 4 / 3; }
   .hero-quote { left: 16px; bottom: -28px; }
   .about-badge { right: 16px; }
   .facts-grid { grid-template-columns: 1fr 1fr; }
