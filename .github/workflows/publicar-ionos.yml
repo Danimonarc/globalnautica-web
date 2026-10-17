@@ -1,0 +1,81 @@
+# Publica la web en el hosting de IONOS (www.globalnautica.com) cada vez que
+# se actualiza main, o a mano desde la pestaña Actions ("Run workflow").
+#
+# Necesita estos secretos en Settings → Secrets and variables → Actions:
+#   IONOS_SFTP_HOST      p. ej. access-5012345678.webspace-host.com
+#   IONOS_SFTP_USER      usuario SFTP creado en IONOS (Hosting → SFTP y SSH)
+#   IONOS_SFTP_PASSWORD  su contraseña
+#   IONOS_SFTP_DIR       carpeta del espacio web a la que apunta el dominio,
+#                        p. ej. /globalnautica-web (nunca la raíz "/")
+#
+# Mientras no estén configurados, el workflow no publica nada.
+# La carpeta de destino se deja idéntica a la web generada: lo que no esté en
+# la web se borra, por eso debe ser una carpeta dedicada solo a ella.
+
+name: Publicar en IONOS
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: publicar-ionos
+  cancel-in-progress: false
+
+jobs:
+  publicar:
+    runs-on: ubuntu-latest
+    env:
+      SFTP_HOST: ${{ secrets.IONOS_SFTP_HOST }}
+      SFTP_USER: ${{ secrets.IONOS_SFTP_USER }}
+      SFTP_PASSWORD: ${{ secrets.IONOS_SFTP_PASSWORD }}
+      SFTP_DIR: ${{ secrets.IONOS_SFTP_DIR }}
+    steps:
+      - name: Comprobar la configuración
+        id: config
+        run: |
+          if [ -z "$SFTP_HOST" ] || [ -z "$SFTP_USER" ] || [ -z "$SFTP_PASSWORD" ] || [ -z "$SFTP_DIR" ]; then
+            echo "::notice::Faltan los secretos de IONOS: no se publica nada."
+            echo "listo=false" >> "$GITHUB_OUTPUT"
+          elif [ "$SFTP_DIR" = "/" ]; then
+            echo "::error::IONOS_SFTP_DIR no puede ser la raíz: use una carpeta dedicada a la web."
+            exit 1
+          else
+            echo "listo=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - uses: actions/checkout@v4
+        if: steps.config.outputs.listo == 'true'
+
+      - uses: actions/setup-python@v5
+        if: steps.config.outputs.listo == 'true'
+        with:
+          python-version: "3.12"
+
+      - name: Generar la web sin noindex
+        if: steps.config.outputs.listo == 'true'
+        run: |
+          NOINDEX=0 python build.py
+          if grep -rl 'content="noindex"' --include='*.html' .; then
+            echo "::error::Hay páginas con noindex: no se publica."
+            exit 1
+          fi
+
+      - name: Preparar los archivos que van al servidor
+        if: steps.config.outputs.listo == 'true'
+        run: |
+          mkdir -p "$RUNNER_TEMP/web"
+          tar -cf - --exclude='./.git*' --exclude='./_src' --exclude='./build.py' \
+            --exclude='./README.md' --exclude='./serve.bat' --exclude='./publicar' . \
+            | tar -xf - -C "$RUNNER_TEMP/web"
+          ls -A "$RUNNER_TEMP/web"
+
+      - name: Subir a IONOS por SFTP
+        if: steps.config.outputs.listo == 'true'
+        run: |
+          sudo apt-get install -y -qq lftp > /dev/null
+          lftp -c "set sftp:auto-confirm yes; set net:max-retries 3; \
+            open -u \"$SFTP_USER\",\"$SFTP_PASSWORD\" sftp://$SFTP_HOST; \
+            mkdir -p -f \"$SFTP_DIR\"; \
+            mirror --reverse --delete --verbose --parallel=4 \"$RUNNER_TEMP/web/\" \"$SFTP_DIR\""
