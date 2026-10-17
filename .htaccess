@@ -10,7 +10,7 @@ RewriteRule ^(.*)$ https://www.globalnautica.com/$1 [R=301,L]
 # Redirigir las URLs de la web antigua a sus equivalentes nuevas
 # (NE evita que el "#" de los anclajes se codifique)
 RewriteRule ^2\.html$ /#servicios [R=301,L,NE]
-RewriteRule ^3\.html$ /servicios-tecnicos/ [R=301,L]
+RewriteRule ^3\.html$ /#servicios [R=301,L,NE]
 RewriteRule ^5\.html$ /fiscalidad-nautica/ [R=301,L]
 RewriteRule ^9\.html$ /gestoria-nautica/ [R=301,L]
 RewriteRule ^6\.html$ /#recursos [R=301,L,NE]
