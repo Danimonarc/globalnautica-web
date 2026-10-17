@@ -57,6 +57,28 @@ assets/                       CSS, JS e imágenes
 2. Escribe solo el texto del artículo (párrafos, `<h2>`, listas, preguntas frecuentes...). La cabecera, el contacto lateral, las guías relacionadas, los datos estructurados y el tiempo de lectura los añade `build.py`.
 3. Ejecuta `python build.py`. La guía aparece sola en el índice de guías, en la portada (si es de las tres más recientes) y en el `sitemap.xml`.
 
+## Publicar en IONOS
+
+Cada vez que se actualiza `main` (al aceptar una PR), GitHub Actions genera la web
+sin `noindex` y la sube por SFTP al hosting de IONOS
+(`.github/workflows/publicar-ionos.yml`). También se puede lanzar a mano desde la
+pestaña **Actions → Publicar en IONOS → Run workflow**.
+
+Configuración, una sola vez:
+
+1. En IONOS, **Hosting → SFTP y SSH**: crear un usuario SFTP y anotar el servidor
+   (`access-….webspace-host.com`).
+2. En el espacio web, crear una carpeta solo para la web (p. ej. `/globalnautica-web`)
+   y en **Dominios y SSL** hacer que www.globalnautica.com apunte a ella. El workflow
+   deja esa carpeta idéntica a la web generada y borra lo que sobre, así que no debe
+   contener nada más.
+3. En GitHub, **Settings → Secrets and variables → Actions**, crear los secretos
+   `IONOS_SFTP_HOST`, `IONOS_SFTP_USER`, `IONOS_SFTP_PASSWORD` e `IONOS_SFTP_DIR`.
+
+Mientras falten los secretos, el workflow no publica nada. La copia de GitHub Pages
+sigue generándose con `noindex` (`python build.py`); para generar en local la versión
+del dominio real: `NOINDEX=0 python build.py`.
+
 ## SEO
 
 Ya hecho en el código:
