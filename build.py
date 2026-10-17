@@ -47,7 +47,7 @@ T = {
         "suggest": ("Esta página también está disponible en español.", "Ver en español", "Cerrar"),
         "country": "España",
         "funding_alt": "Ministerio para la Transición Ecológica y el Reto Demográfico, IDAE, MOVES III, Junta de Andalucía, Agencia Andaluza de la Energía",
-        "tag": "Asesoría náutica integral en la Costa del Sol desde 1999.",
+        "tag": "Consultoría náutica integral en la Costa del Sol desde 1999.",
         "footer_services": "Servicios",
         "footer_company": "Empresa",
         "legal": [("aviso-legal/", "Aviso legal"), ("aviso-legal/#privacidad", "Privacidad"), ("aviso-legal/#cookies", "Cookies")],
