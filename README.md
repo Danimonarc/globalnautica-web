@@ -43,7 +43,7 @@ assets/                       CSS, JS e imágenes
 
 ## Cómo añadir una guía (artículo)
 
-> **Ahora mismo las guías están ocultas** (`SHOW_GUIDES = False` en `build.py`): no se generan ni se enlazan desde ningún sitio. Para publicarlas, ponlo a `True` y ejecuta `python build.py`. En los fragmentos, lo que enlaza a guías va entre `<!-- guides -->` y `<!-- /guides -->`, para que se pueda quitar.
+> Las guías están publicadas (`SHOW_GUIDES = True` en `build.py`). Para ocultarlas todas, ponlo a `False` y ejecuta `python build.py`: dejan de generarse y se quitan sus enlaces (en los fragmentos van entre `<!-- guides -->` y `<!-- /guides -->`).
 
 1. Copia un archivo de `_src/guias/` (o de `_src/en/guides/` para inglés) y cambia los metadatos de arriba:
 
@@ -168,7 +168,8 @@ Lo que hay que hacer fuera del código:
 - [ ] **WhatsApp:** el botón usa el móvil +34 637 742 113. Confirmar que ese número tiene WhatsApp.
 - [ ] **Atención en inglés:** las páginas de servicio dicen "Atención en español e inglés". Confirmar que es así.
 - [ ] **Textos de las páginas de servicio:** revisar las explicaciones fiscales y administrativas (IEDMT, importación temporal, Lista 6ª/7ª, ITB). Están redactadas de forma general, pero conviene que las valide alguien del oficio.
-- [ ] **Guías prácticas:** publicar artículos sobre lo que preguntan los clientes (cuánto cuesta matricular un barco, renovar la importación temporal...).
+- [x] **Guías prácticas:** publicadas 6 guías en español y 6 en inglés (matriculación, importación temporal, bandera extranjera, compraventa, Lista 6ª/7ª). Conviene que alguien del oficio revise las cifras y plazos, y actualizar la fecha (`date:`) cuando cambie algo.
+- [ ] **Más guías:** seguir añadiendo artículos sobre lo que preguntan los clientes.
 - [ ] **Workflow de publicación:** GitHub avisa de que `actions/checkout@v4` y `actions/setup-python@v5` usan Node.js 20, que está obsoleto. Funciona, pero conviene subirlos a `actions/checkout@v5` y `actions/setup-python@v6` en `.github/workflows/publicar-ionos.yml`.
 - [ ] **Formulario de contacto:** ahora mismo es `mailto:`. Se podría usar Formspree, Netlify Forms o un PHP en el hosting.
 - [ ] **Bloque "Cómo trabajamos":** el texto es nuevo, no viene de la web actual. Validarlo con la empresa.

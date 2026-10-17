@@ -30,10 +30,10 @@ MAPS_URL = "https://www.google.es/maps/place/Global+Nautica/@36.4167014,-5.15771
 # (.github/workflows/publicar-ionos.yml) genera la web con NOINDEX=0.
 NOINDEX = os.environ.get("NOINDEX", "1") != "0"
 
-# Las guías (_src/guias/ y _src/en/guides/) están ocultas hasta que se revisen.
-# Con False no se generan, y se quitan sus enlaces del menú, el pie, la portada y
-# los servicios (los bloques marcados con <!-- guides --> ... <!-- /guides -->).
-SHOW_GUIDES = False
+# Guías (_src/guias/ y _src/en/guides/). Con False no se generan, y se quitan sus
+# enlaces del menú, el pie, la portada y los servicios (los bloques marcados con
+# <!-- guides --> ... <!-- /guides -->).
+SHOW_GUIDES = True
 GUIDE_PATHS = ("guias/", "en/guides/")
 
 T = {
