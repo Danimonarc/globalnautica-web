@@ -16,11 +16,6 @@
     <xhtml:link rel="alternate" hreflang="es" href="https://www.globalnautica.com/aviso-legal/"/>
   </url>
   <url>
-    <loc>https://www.globalnautica.com/en/marine-surveyor-costa-del-sol/</loc>
-    <xhtml:link rel="alternate" hreflang="en" href="https://www.globalnautica.com/en/marine-surveyor-costa-del-sol/"/>
-    <xhtml:link rel="alternate" hreflang="es" href="https://www.globalnautica.com/servicios-tecnicos/"/>
-  </url>
-  <url>
     <loc>https://www.globalnautica.com/en/yacht-registration-spain/</loc>
     <xhtml:link rel="alternate" hreflang="en" href="https://www.globalnautica.com/en/yacht-registration-spain/"/>
     <xhtml:link rel="alternate" hreflang="es" href="https://www.globalnautica.com/gestoria-nautica/"/>
@@ -44,10 +39,5 @@
     <loc>https://www.globalnautica.com/</loc>
     <xhtml:link rel="alternate" hreflang="es" href="https://www.globalnautica.com/"/>
     <xhtml:link rel="alternate" hreflang="en" href="https://www.globalnautica.com/en/"/>
-  </url>
-  <url>
-    <loc>https://www.globalnautica.com/servicios-tecnicos/</loc>
-    <xhtml:link rel="alternate" hreflang="es" href="https://www.globalnautica.com/servicios-tecnicos/"/>
-    <xhtml:link rel="alternate" hreflang="en" href="https://www.globalnautica.com/en/marine-surveyor-costa-del-sol/"/>
   </url>
 </urlset>
