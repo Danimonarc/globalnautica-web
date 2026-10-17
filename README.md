@@ -168,7 +168,7 @@ Lo que hay que hacer fuera del código:
 - [ ] **WhatsApp:** el botón usa el móvil +34 637 742 113. Confirmar que ese número tiene WhatsApp.
 - [ ] **Atención en inglés:** las páginas de servicio dicen "Atención en español e inglés". Confirmar que es así.
 - [ ] **Textos de las páginas de servicio:** revisar las explicaciones fiscales y administrativas (IEDMT, importación temporal, Lista 6ª/7ª, ITB). Están redactadas de forma general, pero conviene que las valide alguien del oficio.
-- [x] **Guías prácticas:** publicadas 6 guías en español y 6 en inglés (matriculación, importación temporal, bandera extranjera, compraventa, Lista 6ª/7ª). Conviene que alguien del oficio revise las cifras y plazos, y actualizar la fecha (`date:`) cuando cambie algo.
+- [x] **Guías prácticas:** publicadas 5 guías en español y 5 en inglés (matriculación, importación temporal, bandera extranjera, compraventa, Lista 6ª/7ª). Conviene que alguien del oficio revise las cifras y plazos, y actualizar la fecha (`date:`) cuando cambie algo.
 - [ ] **Más guías:** seguir añadiendo artículos sobre lo que preguntan los clientes.
 - [ ] **Workflow de publicación:** GitHub avisa de que `actions/checkout@v4` y `actions/setup-python@v5` usan Node.js 20, que está obsoleto. Funciona, pero conviene subirlos a `actions/checkout@v5` y `actions/setup-python@v6` en `.github/workflows/publicar-ionos.yml`.
 - [ ] **Formulario de contacto:** ahora mismo es `mailto:`. Se podría usar Formspree, Netlify Forms o un PHP en el hosting.
