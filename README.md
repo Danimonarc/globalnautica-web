@@ -133,7 +133,7 @@ Ya hecho en el código:
 - Versión en inglés, con `hreflang` entre cada pareja de páginas.
 - Títulos y descripciones orientados a búsquedas reales (consultoría náutica Estepona, IEDMT, importación temporal, nautical consultancy Spain...).
 - Datos estructurados schema.org: empresa local, servicios y ruta de navegación (breadcrumbs).
-- SEO local de la Costa del Sol: sección «Dónde trabajamos» en la portada (municipios y puertos deportivos, de Sotogrande a Málaga), preguntas frecuentes sobre los puertos en las páginas de servicio, Marbella, Puerto Banús y Sotogrande en las descripciones, y los municipios en `areaServed` de los datos estructurados (`AREA_SERVED` en `build.py`). No se crean páginas por municipio: Google penaliza las páginas casi iguales que solo cambian el nombre del lugar.
+- SEO local de la Costa del Sol: sección «Dónde trabajamos» en la portada (una sola oficina en Estepona y los puertos deportivos donde están los barcos de los clientes, de Sotogrande a Caleta de Vélez), preguntas frecuentes sobre los puertos en las páginas de servicio, Marbella, Puerto Banús y Sotogrande en las descripciones, y los municipios en `areaServed` de los datos estructurados (`AREA_SERVED` en `build.py`). No se crean páginas por municipio: Google penaliza las páginas casi iguales que solo cambian el nombre del lugar.
 - URL canónica, `sitemap.xml` y `robots.txt`.
 - `.htaccess` que fuerza `https://www` y redirige (301) las páginas antiguas (`2.html`, `5.html`...) a las nuevas.
 
