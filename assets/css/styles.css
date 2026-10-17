@@ -255,6 +255,13 @@ p { margin: 0 0 1em; }
 @keyframes fade { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
 
 /* ---------- Pasos ---------- */
+/* ---------- Zona de trabajo: municipios y puertos ---------- */
+.ports { list-style: none; padding: 0; margin: 0; display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; }
+.ports li { padding: 24px 24px 22px; border: 1px solid var(--line); border-radius: var(--radius); background: var(--white); }
+.ports h3 { margin: 0 0 6px; font-size: 1.15rem; color: var(--navy); }
+.ports p { margin: 0; color: var(--muted); font-size: .92rem; }
+.ports-note { margin: 28px 0 0; max-width: 760px; color: var(--muted); }
+
 .steps { list-style: none; padding: 0; margin: 0; display: grid; grid-template-columns: repeat(3, 1fr); gap: 28px; counter-reset: s; }
 .step { padding: 36px 32px; border: 1px solid var(--line); border-radius: var(--radius-lg); background: var(--white); position: relative; }
 .step-num { font-family: var(--font-display); font-size: 1rem; color: var(--brass-600); font-weight: 600; display: block; margin-bottom: 18px; }
@@ -542,6 +549,8 @@ p { margin: 0 0 1em; }
 }
 
 @media (max-width: 860px) {
+  .ports { grid-template-columns: repeat(2, 1fr); gap: 12px; }
+  .ports li { padding: 18px 16px; }
   :root { --header-h: 68px; }
   body { font-size: 16px; }
   .nav-toggle { display: block; }
