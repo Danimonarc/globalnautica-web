@@ -62,7 +62,7 @@ assets/                       CSS, JS e imágenes
 Ya hecho en el código:
 - Una página por servicio, con texto propio, preguntas frecuentes y botón de contacto.
 - Versión en inglés, con `hreflang` entre cada pareja de páginas.
-- Títulos y descripciones orientados a búsquedas reales (consultoría náutica Estepona, IEDMT, importación temporal, yacht registration Spain...).
+- Títulos y descripciones orientados a búsquedas reales (consultoría náutica Estepona, IEDMT, importación temporal, nautical consultancy Spain...).
 - Datos estructurados schema.org: empresa local, servicios y ruta de navegación (breadcrumbs).
 - URL canónica, `sitemap.xml` y `robots.txt`.
 - `.htaccess` que fuerza `https://www` y redirige (301) las páginas antiguas (`2.html`, `5.html`...) a las nuevas.
