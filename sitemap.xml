@@ -6,6 +6,11 @@
     <xhtml:link rel="alternate" hreflang="en" href="https://www.globalnautica.com/en/legal-notice/"/>
   </url>
   <url>
+    <loc>https://www.globalnautica.com/consultoria-nautica/</loc>
+    <xhtml:link rel="alternate" hreflang="es" href="https://www.globalnautica.com/consultoria-nautica/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.globalnautica.com/en/yacht-registration-spain/"/>
+  </url>
+  <url>
     <loc>https://www.globalnautica.com/en/</loc>
     <xhtml:link rel="alternate" hreflang="en" href="https://www.globalnautica.com/en/"/>
     <xhtml:link rel="alternate" hreflang="es" href="https://www.globalnautica.com/"/>
@@ -18,7 +23,7 @@
   <url>
     <loc>https://www.globalnautica.com/en/yacht-registration-spain/</loc>
     <xhtml:link rel="alternate" hreflang="en" href="https://www.globalnautica.com/en/yacht-registration-spain/"/>
-    <xhtml:link rel="alternate" hreflang="es" href="https://www.globalnautica.com/gestoria-nautica/"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://www.globalnautica.com/consultoria-nautica/"/>
   </url>
   <url>
     <loc>https://www.globalnautica.com/en/yacht-tax-vat-spain/</loc>
@@ -29,11 +34,6 @@
     <loc>https://www.globalnautica.com/fiscalidad-nautica/</loc>
     <xhtml:link rel="alternate" hreflang="es" href="https://www.globalnautica.com/fiscalidad-nautica/"/>
     <xhtml:link rel="alternate" hreflang="en" href="https://www.globalnautica.com/en/yacht-tax-vat-spain/"/>
-  </url>
-  <url>
-    <loc>https://www.globalnautica.com/gestoria-nautica/</loc>
-    <xhtml:link rel="alternate" hreflang="es" href="https://www.globalnautica.com/gestoria-nautica/"/>
-    <xhtml:link rel="alternate" hreflang="en" href="https://www.globalnautica.com/en/yacht-registration-spain/"/>
   </url>
   <url>
     <loc>https://www.globalnautica.com/</loc>
