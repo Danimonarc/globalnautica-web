@@ -79,7 +79,7 @@ T = {
         "menu": "Open menu",
         "home_label": "Global Nautica, home",
         "nav": [("about", "About us"), ("services", "Services"), ("resources", "Resources"), ("contact", "Contact")],
-        "services": [("en/yacht-tax-vat-spain/", "Yacht tax & VAT"), ("en/yacht-registration-spain/", "Yacht registration")],
+        "services": [("en/yacht-tax-vat-spain/", "Yacht tax & VAT"), ("en/nautical-consultancy-spain/", "Nautical consultancy")],
         "home": "en/",
         "switch": ("ES", "Español", "es"),
         "lang_group": "Language",
