@@ -38,7 +38,7 @@ T = {
         "menu": "Abrir menú",
         "home_label": "Global Nautica, inicio",
         "nav": [("nosotros", "Quiénes somos"), ("servicios", "Servicios"), ("recursos", "Recursos"), ("contacto", "Contacto")],
-        "services": [("fiscalidad-nautica/", "Fiscalidad náutica"), ("gestoria-nautica/", "Gestoría náutica")],
+        "services": [("fiscalidad-nautica/", "Fiscalidad náutica"), ("consultoria-nautica/", "Consultoría náutica")],
         "home": "",
         "switch": ("EN", "English", "en"),
         "lang_group": "Idioma",

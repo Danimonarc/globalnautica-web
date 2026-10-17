@@ -23,7 +23,7 @@ Las páginas se **generan** con `build.py`: el contenido de cada página está e
 _src/                         Contenido de cada página (esto es lo que se edita)
   index.html                  Portada en español
   fiscalidad-nautica.html     -> /fiscalidad-nautica/
-  gestoria-nautica.html       -> /gestoria-nautica/
+  consultoria-nautica.html    -> /consultoria-nautica/
   aviso-legal.html            -> /aviso-legal/ (aviso legal, privacidad y cookies)
   guias/                      Guías (artículos) en español -> /guias/...
   en/                         Versión en inglés (/en/, /en/guides/...)
@@ -62,7 +62,7 @@ assets/                       CSS, JS e imágenes
 Ya hecho en el código:
 - Una página por servicio, con texto propio, preguntas frecuentes y botón de contacto.
 - Versión en inglés, con `hreflang` entre cada pareja de páginas.
-- Títulos y descripciones orientados a búsquedas reales (gestoría náutica Estepona, IEDMT, importación temporal, yacht registration Spain...).
+- Títulos y descripciones orientados a búsquedas reales (consultoría náutica Estepona, IEDMT, importación temporal, yacht registration Spain...).
 - Datos estructurados schema.org: empresa local, servicios y ruta de navegación (breadcrumbs).
 - URL canónica, `sitemap.xml` y `robots.txt`.
 - `.htaccess` que fuerza `https://www` y redirige (301) las páginas antiguas (`2.html`, `5.html`...) a las nuevas.
