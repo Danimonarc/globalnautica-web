@@ -22,6 +22,8 @@ from pathlib import Path
 ROOT = Path(__file__).parent
 SRC = ROOT / "_src"
 SITE = "https://www.globalnautica.com/"
+# Ficha de Global Nautica en Google Maps (dirección del pie y de la portada)
+MAPS_URL = "https://www.google.es/maps/place/Global+Nautica/@36.4167014,-5.1577178,18z/data=!4m5!3m4!1s0x0:0x6d337b854906ca57!8m2!3d36.4170574!4d-5.1562526"
 
 # Mientras la web sea una propuesta alojada fuera de globalnautica.com,
 # no queremos que Google la indexe. La publicación en IONOS
@@ -463,8 +465,8 @@ def layout(p, pages):
         <a href="tel:+34952808606">+34 952 808 606</a><br>
         <a href="tel:+34637742113">+34 637 742 113</a><br>
         <a href="mailto:info@globalnautica.com">info@globalnautica.com</a><br>
-        Avda. del Carmen 9, Edif. Puertosol<br>
-        29680 Estepona (Málaga)
+        <a href="{MAPS_URL}" target="_blank" rel="noopener">Avda. del Carmen 9, Edif. Puertosol<br>
+        29680 Estepona (Málaga)</a>
       </div>
     </div>
 
