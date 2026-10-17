@@ -30,10 +30,10 @@ MAPS_URL = "https://www.google.es/maps/place/Global+Nautica/@36.4167014,-5.15771
 # (.github/workflows/publicar-ionos.yml) genera la web con NOINDEX=0.
 NOINDEX = os.environ.get("NOINDEX", "1") != "0"
 
-# Las guías (_src/guias/ y _src/en/guides/) están ocultas hasta que se revisen.
-# Con False no se generan, y se quitan sus enlaces del menú, el pie, la portada y
-# los servicios (los bloques marcados con <!-- guides --> ... <!-- /guides -->).
-SHOW_GUIDES = False
+# Guías (_src/guias/ y _src/en/guides/). Con False no se generan, y se quitan sus
+# enlaces del menú, el pie, la portada y los servicios (los bloques marcados con
+# <!-- guides --> ... <!-- /guides -->).
+SHOW_GUIDES = True
 GUIDE_PATHS = ("guias/", "en/guides/")
 
 T = {
@@ -123,6 +123,18 @@ T = {
 
 PHONE_SVG = '<svg aria-hidden="true" viewBox="0 0 24 24" width="16" height="16"><path fill="currentColor" d="M6.6 10.8a15.2 15.2 0 0 0 6.6 6.6l2.2-2.2a1 1 0 0 1 1-.25 11.4 11.4 0 0 0 3.6.57 1 1 0 0 1 1 1V20a1 1 0 0 1-1 1A17 17 0 0 1 3 4a1 1 0 0 1 1-1h3.5a1 1 0 0 1 1 1c0 1.25.2 2.45.57 3.57a1 1 0 0 1-.25 1z"/></svg>'
 
+# Municipios de la Costa del Sol donde trabajamos (datos estructurados para Google)
+AREA_SERVED = [
+    {"@type": "AdministrativeArea", "name": "Costa del Sol"},
+    *({"@type": "City", "name": c} for c in (
+        "Estepona", "Marbella", "Manilva", "Casares", "Sotogrande", "Benahavís", "Mijas",
+        "Fuengirola", "Benalmádena", "Torremolinos", "Málaga", "Rincón de la Victoria",
+        "Vélez-Málaga", "Nerja",
+    )),
+    {"@type": "AdministrativeArea", "name": "Andalucía"},
+    {"@type": "Country", "name": "España"},
+]
+
 BUSINESS = {
     "@context": "https://schema.org",
     "@type": "ProfessionalService",
@@ -144,7 +156,7 @@ BUSINESS = {
         "addressCountry": "ES",
     },
     "geo": {"@type": "GeoCoordinates", "latitude": 36.4170574, "longitude": -5.1562526},
-    "areaServed": ["Costa del Sol", "Andalucía", "España"],
+    "areaServed": AREA_SERVED,
     "knowsLanguage": ["es", "en"],
 }
 
@@ -300,7 +312,7 @@ def layout(p, pages):
             "name": p["service"],
             "serviceType": p["service"],
             "provider": {"@id": SITE + "#empresa"},
-            "areaServed": ["Costa del Sol", "España"],
+            "areaServed": AREA_SERVED,
             "url": canonical,
         })
     if is_article:
