@@ -218,7 +218,7 @@ p { margin: 0 0 1em; }
 
 /* ---------- Pestañas de servicios ---------- */
 .tab-list {
-  display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px;
+  display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; gap: 8px;
   background: var(--white); padding: 8px; border-radius: 999px; border: 1px solid var(--line);
   margin-bottom: 32px;
 }
@@ -434,6 +434,12 @@ p { margin: 0 0 1em; }
   border: 1px solid var(--line); text-decoration: none; transition: transform .25s ease, box-shadow .25s ease;
 }
 .related-card:hover { transform: translateY(-4px); box-shadow: var(--shadow); }
+/* Si solo queda una tarjeta, ocupa toda la fila con el texto en línea */
+.related-card:only-child {
+  grid-column: 1 / -1; display: grid; grid-template-columns: auto 1fr auto;
+  align-items: center; column-gap: 32px;
+}
+.related-card:only-child h3, .related-card:only-child p { margin: 0; }
 .related-card h3 { color: var(--navy); }
 .related-card p { color: var(--muted); }
 
@@ -560,7 +566,7 @@ p { margin: 0 0 1em; }
   .area-card { padding: 24px 22px; }
   .section { padding: 80px 0; }
   .section-head { margin-bottom: 36px; }
-  .tab-list { grid-template-columns: 1fr; border-radius: var(--radius); }
+  .tab-list { grid-auto-flow: row; border-radius: var(--radius); }
   .tab-list [role="tab"] { justify-content: flex-start; border-radius: 10px; }
   .panel-body { padding: 32px 24px; }
   .checklist-cols { grid-template-columns: 1fr; }
@@ -571,6 +577,8 @@ p { margin: 0 0 1em; }
   .data-table th, .data-table td { display: block; width: 100%; }
   .data-table th { border-bottom: 0; padding-bottom: 4px; }
   .related { grid-template-columns: 1fr; }
+  .related-card:only-child { display: block; }
+  .related-card:only-child p { margin: 8px 0 16px; }
   .guides-grid { grid-template-columns: 1fr; }
   .page-hero { padding: calc(var(--header-h) + 32px) 0 56px; }
   .main-nav .lang-select { align-self: flex-start; }
