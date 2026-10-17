@@ -15,6 +15,7 @@ Los artículos (type: article) solo contienen el texto: la cabecera, el
 contacto lateral y las guías relacionadas los añade article_body().
 """
 import json
+import os
 import re
 from pathlib import Path
 
@@ -23,8 +24,9 @@ SRC = ROOT / "_src"
 SITE = "https://www.globalnautica.com/"
 
 # Mientras la web sea una propuesta alojada fuera de globalnautica.com,
-# no queremos que Google la indexe. Poner a False al publicar en el dominio real.
-NOINDEX = True
+# no queremos que Google la indexe. La publicación en IONOS
+# (.github/workflows/publicar-ionos.yml) genera la web con NOINDEX=0.
+NOINDEX = os.environ.get("NOINDEX", "1") != "0"
 
 # Las guías (_src/guias/ y _src/en/guides/) están ocultas hasta que se revisen.
 # Con False no se generan, y se quitan sus enlaces del menú, el pie, la portada y
