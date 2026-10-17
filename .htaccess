@@ -19,3 +19,8 @@ RewriteRule ^6\.html$ /#recursos [R=301,L,NE]
 RewriteRule ^7\.html$ /#contacto [R=301,L,NE]
 RewriteRule ^8\.html$ /aviso-legal/ [R=301,L]
 RewriteRule ^aviso-legal\.html$ /aviso-legal/ [R=301,L]
+
+# Guías ocultas de momento (SHOW_GUIDES = False en build.py): redirección
+# temporal a la portada. Quitar estas dos reglas al volver a publicarlas.
+RewriteRule ^guias(/.*)?$ / [R=302,L]
+RewriteRule ^en/guides(/.*)?$ /en/ [R=302,L]
