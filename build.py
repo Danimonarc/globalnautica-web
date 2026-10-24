@@ -25,8 +25,8 @@ SITE = "https://www.globalnautica.com/"
 # Ficha de Global Nautica en Google Maps (dirección del pie y de la portada)
 MAPS_URL = "https://www.google.es/maps/place/Global+Nautica/@36.4167014,-5.1577178,18z/data=!4m5!3m4!1s0x0:0x6d337b854906ca57!8m2!3d36.4170574!4d-5.1562526"
 
-# Mientras la web sea una propuesta alojada fuera de globalnautica.com,
-# no queremos que Google la indexe. La publicación en IONOS
+# Por defecto las páginas llevan noindex, para que ninguna copia fuera de
+# globalnautica.com se indexe. La publicación en IONOS
 # (.github/workflows/publicar-ionos.yml) genera la web con NOINDEX=0.
 NOINDEX = os.environ.get("NOINDEX", "1") != "0"
 

@@ -2,11 +2,7 @@
 
 Web de Global Nautica, publicada en **<https://www.globalnautica.com>** (hosting de IONOS).
 Es una web estática (HTML + CSS + JS, sin dependencias) generada con `build.py`.
-
-| Dónde | Para qué | Indexada en Google |
-|---|---|---|
-| <https://www.globalnautica.com> | Web real, en el hosting de IONOS. Se actualiza sola al cambiar `main`. | Sí |
-| <https://danimonarc.github.io/globalnautica-web/> | Copia de previsualización en GitHub Pages | No (`noindex`) |
+Solo se publica ahí: la copia que había en GitHub Pages se retiró.
 
 **Para cambiar algo de la web:** se edita en `_src/`, se ejecuta `python build.py`, se abre una PR y, al aceptarla en `main`, se publica sola en www.globalnautica.com en un par de minutos (ver [Publicación en IONOS](#publicación-en-ionos)).
 
@@ -121,8 +117,8 @@ En **Actions → Publicar en IONOS**, abrir la ejecución fallida y mirar el pas
 
 ### Generar en local
 
-- `python build.py` genera la copia de previsualización, con `noindex` (es la que se guarda
-  en el repositorio y sirve GitHub Pages).
+- `python build.py` genera la web con `noindex`: es la versión que se guarda en el
+  repositorio y la que se ve en local, para que ninguna copia fuera del dominio se indexe.
 - `NOINDEX=0 python build.py` genera la versión del dominio real, como hace el workflow.
   No hace falta subirla a mano.
 
@@ -137,7 +133,7 @@ Ya hecho en el código:
 - URL canónica, `sitemap.xml` y `robots.txt`.
 - `.htaccess` que fuerza `https://www` y redirige (301) las páginas antiguas (`2.html`, `5.html`...) a las nuevas.
 
-Las páginas que se guardan en el repositorio (y la copia de GitHub Pages) llevan `noindex` para que Google no las confunda con la web real. La versión publicada en www.globalnautica.com se genera sin `noindex` (ver [Publicación en IONOS](#publicación-en-ionos)).
+Las páginas que se guardan en el repositorio llevan `noindex`, para que ninguna copia fuera del dominio se confunda con la web real. La versión publicada en www.globalnautica.com se genera sin `noindex` (ver [Publicación en IONOS](#publicación-en-ionos)).
 
 Lo que hay que hacer fuera del código:
 - [ ] **Google Business Profile**: crear o reclamar la ficha de Global Nautica en Estepona, con categoría, fotos, horario y web, y pedir reseñas a los clientes.
