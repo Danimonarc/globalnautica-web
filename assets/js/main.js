@@ -142,6 +142,54 @@
     suggest.querySelector("a").addEventListener("click", remember);
   }
 
+  // Enlaces de email: si el equipo no tiene programa de correo, el navegador no hace
+  // nada al pulsar. En ese caso mostramos la dirección con alternativas.
+  var mailHelp = null;
+  function showMailHelp(href) {
+    var en = document.documentElement.lang === "en";
+    var address = href.replace(/^mailto:/, "").split("?")[0];
+    var subject = (href.split("subject=")[1] || "").split("&")[0];
+    if (mailHelp) mailHelp.remove();
+    mailHelp = document.createElement("div");
+    mailHelp.className = "mail-help";
+    mailHelp.setAttribute("role", "status");
+    var text = document.createElement("p");
+    text.textContent = (en ? "Didn't your email program open? Write to us at " : "¿No se ha abierto su programa de correo? Escríbanos a ") + address;
+    var actions = document.createElement("div");
+    actions.className = "mail-help-actions";
+    var copy = document.createElement("button");
+    copy.type = "button";
+    copy.textContent = en ? "Copy address" : "Copiar dirección";
+    copy.addEventListener("click", function () {
+      if (navigator.clipboard) navigator.clipboard.writeText(address).then(function () {
+        copy.textContent = en ? "Copied" : "Copiada";
+      });
+    });
+    actions.appendChild(copy);
+    [["Gmail", "https://mail.google.com/mail/?view=cm&to=" + address + "&su=" + subject],
+     ["Outlook", "https://outlook.live.com/mail/0/deeplink/compose?to=" + address + "&subject=" + subject]].forEach(function (w) {
+      var a = document.createElement("a");
+      a.href = w[1]; a.target = "_blank"; a.rel = "noopener";
+      a.textContent = (en ? "Open in " : "Abrir en ") + w[0];
+      actions.appendChild(a);
+    });
+    var close = document.createElement("button");
+    close.type = "button"; close.className = "mail-help-close";
+    close.setAttribute("aria-label", en ? "Close" : "Cerrar");
+    close.textContent = "×";
+    close.addEventListener("click", function () { mailHelp.remove(); mailHelp = null; });
+    mailHelp.appendChild(text); mailHelp.appendChild(actions); mailHelp.appendChild(close);
+    document.body.appendChild(mailHelp);
+  }
+  document.addEventListener("click", function (e) {
+    var link = e.target.closest && e.target.closest('a[href^="mailto:"]');
+    if (!link) return;
+    // Si el programa de correo se abre, la página pierde el foco y no se muestra nada
+    setTimeout(function () {
+      if (!document.hidden && document.hasFocus()) showMailHelp(link.getAttribute("href"));
+    }, 1200);
+  });
+
   // Año del copyright
   document.querySelectorAll("[data-year]").forEach(function (el) {
     el.textContent = new Date().getFullYear();
