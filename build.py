@@ -17,6 +17,7 @@ contacto lateral y las guías relacionadas los añade article_body().
 import json
 import os
 import re
+from html import unescape
 from pathlib import Path
 
 ROOT = Path(__file__).parent
@@ -242,6 +243,20 @@ def guide_cards(guides, r, lang):
     return '        <div class="guides-grid">\n' + "\n".join(cards) + "\n        </div>"
 
 
+def plain(fragment):
+    """Texto sin etiquetas, con las entidades resueltas y los espacios normalizados."""
+    return re.sub(r"\s+", " ", unescape(re.sub(r"<[^>]+>", " ", fragment))).strip()
+
+
+def faq_pairs(body):
+    """Pares (pregunta, respuesta) de los bloques <div class="faq"> de un fragmento."""
+    pairs = []
+    for block in re.findall(r'<div class="faq">(.*?)</div>', body, re.S):
+        for q, a in re.findall(r"<details>\s*<summary>(.*?)</summary>(.*?)</details>", block, re.S):
+            pairs.append((plain(q), plain(a)))
+    return pairs
+
+
 def page_by_path(pages, path):
     return next((x for x in pages if x["path"] == path), None)
 
@@ -443,6 +458,17 @@ def layout(p, pages):
             "publisher": {"@id": SITE + "#empresa"},
             "mainEntityOfPage": canonical,
             "image": SITE + p.get("image", "assets/img/cabos-cubierta.jpg"),
+        })
+    faq = faq_pairs(p["body"])
+    if faq:
+        schema.append({
+            "@context": "https://schema.org",
+            "@type": "FAQPage",
+            "inLanguage": p["lang"],
+            "mainEntity": [
+                {"@type": "Question", "name": q, "acceptedAnswer": {"@type": "Answer", "text": a}}
+                for q, a in faq
+            ],
         })
     if not is_home:
         crumbs = [("Global Nautica", SITE + t["home"])]
