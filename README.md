@@ -170,6 +170,19 @@ En **Actions → Publicar en IONOS**, abrir la ejecución fallida y mirar el pas
 - La imagen principal de la portada lleva `fetchpriority="high"`; las demás, `loading="lazy"`.
 - **Imagen para compartir** (WhatsApp, LinkedIn…): `compartir.jpg` (español) y `compartir-en.jpg` (inglés), de 1200×630. Se generan con `.github/scripts/compartir.html` (`?lang=es` / `?lang=en`), capturando la página a 1200×630 con Playwright en formato JPEG. Los metadatos (`og:image`, tamaño, texto alternativo y `twitter:card`) los añade `build.py`.
 
+## Comprobaciones antes de publicar
+
+`python .github/scripts/check.py` (solo necesita Python) falla si:
+
+1. el HTML guardado en el repositorio no es el que genera `python build.py` (alguien editó `_src/` sin regenerar) o hay páginas sobrantes;
+2. hay enlaces internos rotos: páginas, imágenes, CSS, JS o anclas `#…`;
+3. algún dato estructurado (JSON-LD) no es JSON válido;
+4. falta el título, la descripción, la URL canónica o `og:image` de una página, o se repiten entre páginas;
+5. una pareja `hreflang` español/inglés no existe o no se enlaza en los dos sentidos;
+6. el `sha256` del script en línea de la cabecera no coincide con el de la política de seguridad de `.htaccess`.
+
+Se ejecuta en cada PR (workflow `comprobar.yml`) y, antes de subir nada, en la publicación (`publicar-ionos.yml`): si falla, no se publica.
+
 ## SEO
 
 Ya hecho en el código:
