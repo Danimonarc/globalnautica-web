@@ -462,8 +462,6 @@ p { margin: 0 0 1em; }
 .side-facts { list-style: none; padding: 16px 0 0; margin: 8px 0 0; border-top: 1px solid var(--line); display: grid; gap: 8px; font-size: .88rem; color: var(--muted); }
 .side-facts li::before { content: "— "; color: var(--brass); }
 
-/* Trámites de una página de servicio: pegados a la sección anterior */
-.tramites { padding-top: 0; }
 .related { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
 .related-card {
   display: block; padding: 32px; border-radius: var(--radius-lg); background: var(--white);
