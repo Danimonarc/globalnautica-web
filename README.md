@@ -157,6 +157,8 @@ En **Actions → Publicar en IONOS**, abrir la ejecución fallida y mirar el pas
 5. una pareja `hreflang` español/inglés no existe o no se enlaza en los dos sentidos;
 6. el `sha256` del script en línea de la cabecera no coincide con el de la política de seguridad de `.htaccess`.
 
+También reproduce el control de `noindex` del workflow de publicación: con `NOINDEX=0` no puede quedar ninguna página con `content="noindex"` (la 404 usa `noindex, follow` a propósito, para no activar esa alarma).
+
 Se ejecuta en cada PR (workflow `comprobar.yml`) y, antes de subir nada, en la publicación (`publicar-ionos.yml`): si falla, no se publica.
 
 ## SEO
