@@ -45,6 +45,8 @@ body {
 }
 
 img { max-width: 100%; height: auto; display: block; }
+picture { display: contents; }
+picture source { display: none; }
 a { color: inherit; }
 h1, h2, h3 { font-family: var(--font-display); font-weight: 600; line-height: 1.15; margin: 0 0 .5em; letter-spacing: -.01em; }
 h1 { font-size: clamp(2.4rem, 5vw, 4rem); }

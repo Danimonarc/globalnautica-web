@@ -7,6 +7,9 @@ RewriteCond %{HTTPS} off [OR]
 RewriteCond %{HTTP_HOST} !^www\.globalnautica\.com$ [NC]
 RewriteRule ^(.*)$ https://www.globalnautica.com/$1 [R=301,L]
 
+# Página propia para las direcciones que no existen (mantiene el código 404)
+ErrorDocument 404 /404.html
+
 # Redirigir las URLs de la web antigua a sus equivalentes nuevas
 # (NE evita que el "#" de los anclajes se codifique)
 RewriteRule ^2\.html$ /#servicios [R=301,L,NE]
@@ -20,7 +23,55 @@ RewriteRule ^7\.html$ /#contacto [R=301,L,NE]
 RewriteRule ^8\.html$ /aviso-legal/ [R=301,L]
 RewriteRule ^aviso-legal\.html$ /aviso-legal/ [R=301,L]
 
-# Guías ocultas de momento (SHOW_GUIDES = False en build.py): redirección
-# temporal a la portada. Quitar estas dos reglas al volver a publicarlas.
-RewriteRule ^guias(/.*)?$ / [R=302,L]
-RewriteRule ^en/guides(/.*)?$ /en/ [R=302,L]
+
+# ---------------------------------------------------------------------------
+# Velocidad: caché, compresión. Seguridad: cabeceras.
+# Todo va dentro de <IfModule>: si el hosting no tiene un módulo, esa parte no
+# se aplica (y la web sigue funcionando) en vez de dar un error 500.
+# ---------------------------------------------------------------------------
+
+AddDefaultCharset UTF-8
+<IfModule mod_mime.c>
+  AddType font/woff2 .woff2
+  AddType image/webp .webp
+</IfModule>
+
+# Caché del navegador
+<IfModule mod_headers.c>
+  # CSS y JS llevan su huella en la URL (?v=…, la pone build.py): al cambiar el archivo
+  # cambia la URL, así que se pueden guardar un año. Las fuentes no cambian de nombre.
+  <FilesMatch "\.(css|js|woff2)$">
+    Header set Cache-Control "public, max-age=31536000, immutable"
+  </FilesMatch>
+  # Imágenes: un mes
+  <FilesMatch "\.(jpe?g|png|webp|avif|svg|ico)$">
+    Header set Cache-Control "public, max-age=2592000"
+  </FilesMatch>
+  # Páginas, sitemap y robots: el navegador pregunta siempre si han cambiado
+  <FilesMatch "\.(html|xml|txt)$">
+    Header set Cache-Control "no-cache"
+  </FilesMatch>
+</IfModule>
+
+# Compresión de texto
+<IfModule mod_deflate.c>
+  AddOutputFilterByType DEFLATE text/html text/plain text/css text/xml application/xml application/javascript text/javascript application/json application/ld+json image/svg+xml
+</IfModule>
+<IfModule mod_brotli.c>
+  AddOutputFilterByType BROTLI_COMPRESS text/html text/plain text/css text/xml application/xml application/javascript text/javascript application/json application/ld+json image/svg+xml
+</IfModule>
+
+# Cabeceras de seguridad
+<IfModule mod_headers.c>
+  Header always set X-Content-Type-Options "nosniff"
+  Header always set X-Frame-Options "SAMEORIGIN"
+  Header always set Referrer-Policy "strict-origin-when-cross-origin"
+  Header always set Permissions-Policy "camera=(), microphone=(), geolocation=(), payment=(), usb=()"
+  # Los navegadores ignoran HSTS si se recibe por http; sin includeSubDomains para no
+  # afectar a otros subdominios (correo, etc.)
+  Header always set Strict-Transport-Security "max-age=31536000"
+  # Política de contenido: solo recursos propios, el mapa de Google bajo demanda y el
+  # script en línea de la cabecera (identificado por su huella; si se cambia ese script
+  # en build.py hay que recalcular el sha256 de aquí: lo comprueba .github/scripts/check.py)
+  Header always set Content-Security-Policy "default-src 'self'; script-src 'self' 'sha256-WZRJfWvsnNCPcxzZwvyhovnZGqhZaC+8gPGPRbx6wTk='; style-src 'self'; img-src 'self' data:; font-src 'self'; connect-src 'self'; frame-src https://maps.google.com https://www.google.com https://www.google.es; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'self'"
+</IfModule>

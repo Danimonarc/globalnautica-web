@@ -1,0 +1,39 @@
+<!doctype html>
+<!-- Imagen para compartir en redes (1200×630). Se abre con ?lang=es o ?lang=en y se captura con
+     Playwright a assets/img/compartir.jpg y compartir-en.jpg (ver README). -->
+<meta charset="utf-8">
+<style>
+@font-face{font-family:Fraunces;src:url(../../assets/fonts/fraunces-normal-latin-3.woff2);font-weight:100 900}
+@font-face{font-family:Fraunces;font-style:italic;src:url(../../assets/fonts/fraunces-italic-latin-1.woff2);font-weight:100 900}
+@font-face{font-family:Inter;src:url(../../assets/fonts/inter-normal-latin-5.woff2);font-weight:100 900}
+*{margin:0;box-sizing:border-box}
+body{width:1200px;height:630px;overflow:hidden;font-family:Inter,sans-serif;color:#fff;
+  background:linear-gradient(160deg,#0b2a5e 0%,#061533 100%);position:relative}
+svg{position:absolute;left:0;bottom:0;width:1200px;height:230px}
+svg path{fill:none;stroke:#c49a52;stroke-width:2;opacity:.35}
+.c{position:absolute;left:84px;top:70px;right:84px}
+.brand{display:flex;align-items:center;gap:24px}
+.mark{width:66px;height:80px;overflow:hidden;border-radius:10px;box-shadow:0 0 0 1px rgba(255,255,255,.18)}
+.mark img{height:80px}
+.name{font:italic 700 34px Arial,Helvetica,sans-serif;letter-spacing:.04em;text-transform:uppercase}
+h1{font:600 80px/1.08 Fraunces,serif;margin-top:62px;max-width:1000px}
+h1 em{color:#c49a52;font-style:italic}
+p{margin-top:30px;font-size:31px;line-height:1.35;color:#c9d5ea;max-width:900px}
+.url{position:absolute;left:84px;bottom:56px;font-size:30px;font-weight:600;letter-spacing:.04em;color:#c49a52}
+</style>
+<svg viewBox="0 0 1200 230" preserveAspectRatio="none" aria-hidden="true">
+  <path d="M0 120 C 200 80 400 160 600 120 S 1000 80 1200 120"/>
+  <path d="M0 160 C 200 120 400 200 600 160 S 1000 120 1200 160"/>
+  <path d="M0 200 C 200 160 400 240 600 200 S 1000 160 1200 200"/>
+</svg>
+<div class="c">
+  <div class="brand"><div class="mark"><img src="../../assets/img/logo-vela.jpg" alt=""></div><div class="name">Global Nautica</div></div>
+  <h1 id="h"></h1>
+  <p id="p"></p>
+</div>
+<div class="url">www.globalnautica.com</div>
+<script>
+const en = new URLSearchParams(location.search).get('lang') === 'en';
+document.getElementById('h').innerHTML = en ? 'Nautical consultancy on the <em>Costa del Sol</em>' : 'Consultoría náutica en la <em>Costa del Sol</em>';
+document.getElementById('p').textContent = en ? 'Yacht tax, registration and all the paperwork for your boat. Estepona, since 1999.' : 'Fiscalidad, matriculación y toda la documentación de su embarcación. Estepona, desde 1999.';
+</script>

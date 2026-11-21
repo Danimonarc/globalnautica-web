@@ -14,9 +14,11 @@ Marcadores disponibles en los fragmentos:
 Los artículos (type: article) solo contienen el texto: la cabecera, el
 contacto lateral y las guías relacionadas los añade article_body().
 """
+import hashlib
 import json
 import os
 import re
+import subprocess
 from pathlib import Path
 
 ROOT = Path(__file__).parent
@@ -30,11 +32,11 @@ MAPS_URL = "https://www.google.es/maps/place/Global+Nautica/@36.4167014,-5.15771
 # (.github/workflows/publicar-ionos.yml) genera la web con NOINDEX=0.
 NOINDEX = os.environ.get("NOINDEX", "1") != "0"
 
-# Las guías (_src/guias/ y _src/en/guides/) están ocultas. Con False no se generan,
-# y se quitan sus enlaces del menú, el pie, la portada y los servicios (los bloques
-# marcados con <!-- guides --> ... <!-- /guides -->). Mientras estén ocultas,
-# .htaccess redirige temporalmente sus URL a la portada.
-SHOW_GUIDES = False
+# Guías (_src/guias/ y _src/en/guides/): cada una se publica con «published: true» en su cabecera.
+# El índice, el menú «Guías» y los bloques marcados con <!-- guides --> ... <!-- /guides -->
+# aparecen solo si hay al menos una guía publicada en ese idioma. Los enlaces a guías sin
+# publicar se quitan solos. Para ver todas en local: GUIDES=all python build.py
+SHOW_GUIDES = os.environ.get("GUIDES", "") == "all"
 GUIDE_PATHS = ("guias/", "en/guides/")
 
 T = {
@@ -56,6 +58,8 @@ T = {
         "legal": [("aviso-legal/", "Aviso legal"), ("aviso-legal/#privacidad", "Privacidad"), ("aviso-legal/#cookies", "Cookies")],
         "funding": "Global Nautica ha recibido una ayuda de la Unión Europea con cargo al Fondo NextGenerationEU, en el marco del Plan de Recuperación, Transformación y Resiliencia, para la adquisición de vehículo eléctrico enchufable dentro del Programa de incentivos a la movilidad eficiente y sostenible (Programa MOVES III Andalucía) del Ministerio para la Transición Ecológica y el Reto Demográfico, gestionado por la Junta de Andalucía, a través de la Agencia Andaluza de la Energía.",
         "locale": "es_ES",
+        "og_image": "assets/img/compartir.jpg",
+        "og_alt": "Global Nautica: consultoría náutica en la Costa del Sol",
         "guides": ("guias/", "Guías"),
         "months": ["enero", "febrero", "marzo", "abril", "mayo", "junio", "julio", "agosto",
                    "septiembre", "octubre", "noviembre", "diciembre"],
@@ -97,6 +101,8 @@ T = {
         "legal": [("en/legal-notice/", "Legal notice"), ("en/legal-notice/#privacy", "Privacy"), ("en/legal-notice/#cookies", "Cookies")],
         "funding": "Global Nautica has received European Union funding from the NextGenerationEU Fund, under the Recovery, Transformation and Resilience Plan, for the purchase of a plug-in electric vehicle within the MOVES III Andalucía programme of the Spanish Ministry for the Ecological Transition and the Demographic Challenge, managed by the Junta de Andalucía through the Andalusian Energy Agency.",
         "locale": "en_GB",
+        "og_image": "assets/img/compartir-en.jpg",
+        "og_alt": "Global Nautica: nautical consultancy on the Costa del Sol",
         "guides": ("en/guides/", "Guides"),
         "months": ["January", "February", "March", "April", "May", "June", "July", "August",
                    "September", "October", "November", "December"],
@@ -170,7 +176,53 @@ def parse(path):
         key, _, value = line.partition(":")
         meta[key.strip()] = value.strip()
     meta["body"] = text[m.end():]
+    meta["src"] = path.relative_to(ROOT).as_posix()
     return meta
+
+
+def git(*args):
+    """Salida de un comando git en la raíz del proyecto, o None si falla (sin git, sin repositorio…)."""
+    try:
+        r = subprocess.run(["git", *args], cwd=ROOT, capture_output=True, text=True)
+    except OSError:
+        return None
+    return r.stdout.strip() if r.returncode == 0 else None
+
+
+# En un clon superficial (el de GitHub Actions por defecto) todos los archivos parecerían
+# modificados en el último commit, así que no se calcula lastmod hasta tener el historial.
+SHALLOW = git("rev-parse", "--is-shallow-repository") != "false"
+
+
+IMG_RE = re.compile(r'<img src="([^"]*assets/img/([\w-]+)\.(?:jpg|png))"([^>]*)>')
+
+
+def picturize(page):
+    """Envuelve cada <img> que tenga su versión .webp en <picture>, dejando el JPG/PNG de respaldo.
+    Las variantes se generan con .github/scripts/imagenes.py."""
+    def uno(m):
+        src, name, rest = m.groups()
+        if not (ROOT / "assets" / "img" / f"{name}.webp").exists():
+            return m.group(0)
+        return f'<picture><source srcset="{src.rsplit(".", 1)[0]}.webp" type="image/webp"><img src="{src}"{rest}></picture>'
+    return IMG_RE.sub(uno, page)
+
+
+def asset(r, path):
+    """Ruta de un CSS o JS con su huella (?v=…): al cambiar el archivo cambia la URL, y así
+    el navegador puede guardarlo un año (ver la caché de .htaccess)."""
+    return f"{r}{path}?v={hashlib.sha256((ROOT / path).read_bytes()).hexdigest()[:8]}"
+
+
+def last_modified(p):
+    """Fecha (AAAA-MM-DD) del último cambio de la página, o None si no se sabe con certeza."""
+    if p.get("modified"):
+        return p["modified"]
+    if p.get("type") == "article":
+        return p["date"]
+    if SHALLOW:
+        return None
+    return git("log", "-1", "--format=%cs", "--", p["src"]) or None
 
 
 def rel(depth):
@@ -220,6 +272,17 @@ def guide_cards(guides, r, lang):
     return '        <div class="guides-grid">\n' + "\n".join(cards) + "\n        </div>"
 
 
+def sin_enlaces_ocultos(body, ocultas):
+    """Quita los enlaces a guías sin publicar: sus puntos de las listas de guías relacionadas
+    (y la lista entera si se queda vacía) y, dentro de un texto, deja solo el texto."""
+    guia = r'\{\{R\}\}((?:guias|en/guides)/[^"#]*)'
+    body = re.sub(r'[ \t]*<li><a href="' + guia + r'"[^>]*>[^\n]*?</a></li>\n?',
+                  lambda m: "" if m.group(1) in ocultas else m.group(0), body)
+    body = re.sub(r'[ \t]*<aside class="related-guides">\s*<p class="related-guides-title">[^<]*</p>\s*<ul>\s*</ul>\s*</aside>\n?', "", body)
+    return re.sub(r'<a href="' + guia + r'"[^>]*>(.*?)</a>',
+                  lambda m: m.group(2) if m.group(1) in ocultas else m.group(0), body, flags=re.S)
+
+
 def article_body(p, pages, r):
     """Envuelve el texto de un artículo con su cabecera, contacto lateral y guías relacionadas."""
     lang = p["lang"]
@@ -232,6 +295,17 @@ def article_body(p, pages, r):
         if service_label else ""
     )
     others = [g for g in guides_of(pages, lang) if g["path"] != p["path"]][:3]
+    more = f"""
+    <section class="section section-tint">
+      <div class="container">
+        <header class="section-head">
+          <p class="eyebrow">{a['more']}</p>
+          <h2>{a['more_title']}</h2>
+        </header>
+{guide_cards(others, r, lang)}
+      </div>
+    </section>
+""" if others else ""
     subject = a["subject"].replace(" ", "%20")
     return f"""    <section class="page-hero article-hero">
       <div class="container">
@@ -260,17 +334,7 @@ def article_body(p, pages, r):
         </aside>
       </div>
     </section>
-
-    <section class="section section-tint">
-      <div class="container">
-        <header class="section-head">
-          <p class="eyebrow">{a['more']}</p>
-          <h2>{a['more_title']}</h2>
-        </header>
-{guide_cards(others, r, lang)}
-      </div>
-    </section>
-
+{more}
     <section class="cta-band">
       <div class="container cta-inner">
         <div>
@@ -289,7 +353,9 @@ def article_body(p, pages, r):
 def layout(p, pages):
     t = T[p["lang"]]
     path = p["path"]
-    r = rel(depth_of(path))
+    # Páginas con «absolute: true» (la 404) se sirven desde cualquier ruta: enlaces con «/» inicial
+    r = "/" if p.get("absolute") == "true" else rel(depth_of(path))
+    indexable = p.get("noindex") != "true"
     is_article = p.get("type") == "article"
     is_home = path == t["home"]
     home = link(r, t["home"])
@@ -330,7 +396,7 @@ def layout(p, pages):
             "mainEntityOfPage": canonical,
             "image": SITE + p.get("image", "assets/img/cabos-cubierta.jpg"),
         })
-    if not is_home:
+    if not is_home and indexable:
         crumbs = [("Global Nautica", SITE + t["home"])]
         if is_article:
             crumbs.append((t["guides"][1], SITE + t["guides"][0]))
@@ -347,9 +413,10 @@ def layout(p, pages):
         f'  <script type="application/ld+json">{json.dumps(s, ensure_ascii=False)}</script>' for s in schema
     )
 
+    guides_on = bool(guides_of(pages, p["lang"]))  # hay alguna guía publicada en este idioma
     guides_li = f'          <li><a href="{link(r, t["guides"][0])}">{t["guides"][1]}</a></li>'
     nav_items = [f'          <li><a href="{anchor(a)}">{label}</a></li>' for a, label in t["nav"]]
-    if SHOW_GUIDES:
+    if guides_on:
         nav_items.insert(2, guides_li)  # Quiénes somos, Servicios, Guías, Recursos, Contacto
     else:
         guides_li = ""
@@ -379,8 +446,10 @@ def layout(p, pages):
     company = "\n".join(f'          <li><a href="{anchor(a)}">{label}</a></li>' for a, label in t["nav"] if a not in ("servicios", "services"))
     legal = "\n".join(f'          <li><a href="{link(r, u)}">{label}</a></li>' for u, label in t["legal"])
     legal_inline = " · ".join(f'<a href="{link(r, u)}">{label}</a>' for u, label in t["legal"])
-    robots = '  <meta name="robots" content="noindex">\n' if NOINDEX else ""
-    image = SITE + p.get("image", "assets/img/cabos-cubierta.jpg")
+    robots = '  <meta name="robots" content="noindex">\n' if (NOINDEX or not indexable) else ""
+    canon = f'  <link rel="canonical" href="{canonical}">\n{hreflang}\n' if indexable else ""
+    og_url = f'  <meta property="og:url" content="{canonical}">\n' if indexable else ""
+    share = SITE + t["og_image"]
     if is_article:
         body = article_body(p, pages, r)
     else:
@@ -389,20 +458,18 @@ def layout(p, pages):
                 .replace("{{GUIDES}}", guide_cards(guides, r, p["lang"]))
                 .replace("{{GUIDES_LATEST}}", guide_cards(guides[:3], r, p["lang"])))
     guides_block = re.compile(r"[ \t]*<!-- guides -->.*?<!-- /guides -->\n?", re.S)
-    body = guides_block.sub("", body) if not SHOW_GUIDES else body.replace("<!-- guides -->\n", "").replace("<!-- /guides -->\n", "")
+    body = guides_block.sub("", body) if not guides_on else body.replace("<!-- guides -->\n", "").replace("<!-- /guides -->\n", "")
     body = body.replace("{{R}}", r)
     og_type = "article" if is_article else "website"
 
-    return f"""<!doctype html>
+    page = f"""<!doctype html>
 <html lang="{p['lang']}">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>{p['title']}</title>
   <meta name="description" content="{p['description']}">
-{robots}  <link rel="canonical" href="{canonical}">
-{hreflang}
-  <meta name="theme-color" content="#0b2a5e">
+{robots}{canon}  <meta name="theme-color" content="#0b2a5e">
   <link rel="icon" href="{r}assets/img/favicon.svg" type="image/svg+xml">
 
   <meta property="og:type" content="{og_type}">
@@ -410,11 +477,15 @@ def layout(p, pages):
   <meta property="og:locale" content="{t['locale']}">
   <meta property="og:title" content="{p['title']}">
   <meta property="og:description" content="{p['description']}">
-  <meta property="og:url" content="{canonical}">
-  <meta property="og:image" content="{image}">
+{og_url}  <meta property="og:image" content="{share}">
+  <meta property="og:image:type" content="image/jpeg">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="{t['og_alt']}">
+  <meta name="twitter:card" content="summary_large_image">
 
-  <link rel="stylesheet" href="{r}assets/css/fonts.css">
-  <link rel="stylesheet" href="{r}assets/css/styles.css">
+  <link rel="stylesheet" href="{asset(r, 'assets/css/fonts.css')}">
+  <link rel="stylesheet" href="{asset(r, 'assets/css/styles.css')}">
   <script>document.documentElement.classList.add("js");</script>
 {ld}
 </head>
@@ -426,7 +497,7 @@ def layout(p, pages):
   <header class="site-header" data-header>
     <div class="container header-inner">
       <a href="{home if not is_home else '#inicio'}" class="brand" aria-label="{t['home_label']}">
-        <span class="brand-mark"><img src="{r}assets/img/logo-original.jpg" alt="" width="598" height="110"></span>
+        <span class="brand-mark"><img src="{r}assets/img/logo-vela.jpg" alt="" width="90" height="110"></span>
         <span class="brand-name">Global Nautica</span>
       </a>
 
@@ -456,7 +527,7 @@ def layout(p, pages):
     <div class="container footer-grid">
       <div>
         <a href="{home}" class="brand brand-footer">
-          <span class="brand-mark"><img src="{r}assets/img/logo-original.jpg" alt="" width="598" height="110"></span>
+          <span class="brand-mark"><img src="{r}assets/img/logo-vela.jpg" alt="" width="90" height="110"></span>
           <span class="brand-name">Global Nautica</span>
         </a>
         <p class="footer-tag">{t['tag']}</p>
@@ -495,22 +566,27 @@ def layout(p, pages):
     </div>
   </footer>
 
-  <script src="{r}assets/js/main.js" defer></script>
+  <script src="{asset(r, 'assets/js/main.js')}" defer></script>
 </body>
 </html>
 """
+    return picturize(page)
 
 
 def sitemap(pages):
     rows = []
     for p in pages:
+        if p.get("noindex") == "true":
+            continue
         alts = [(p["lang"], SITE + p["path"])]
         if "alt" in p:
             alts.append(("en" if p["lang"] == "es" else "es", SITE + p["alt"]))
         links = "".join(
             f'\n    <xhtml:link rel="alternate" hreflang="{lg}" href="{u}"/>' for lg, u in alts
         )
-        rows.append(f"  <url>\n    <loc>{SITE + p['path']}</loc>{links}\n  </url>")
+        mod = last_modified(p)
+        lastmod = f"\n    <lastmod>{mod}</lastmod>" if mod else ""
+        rows.append(f"  <url>\n    <loc>{SITE + p['path']}</loc>{lastmod}{links}\n  </url>")
     return (
         '<?xml version="1.0" encoding="UTF-8"?>\n'
         '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" '
@@ -518,20 +594,44 @@ def sitemap(pages):
     )
 
 
+def prune(f):
+    """Borra un archivo generado y las carpetas que queden vacías."""
+    f.unlink()
+    for parent in f.parents:
+        if parent == ROOT or any(parent.iterdir()):
+            break
+        parent.rmdir()
+
+
+def es_guia(p):
+    return p["path"].startswith(GUIDE_PATHS)
+
+
+def publicada(p):
+    return SHOW_GUIDES or p.get("published") == "true"
+
+
 def main():
     pages = [parse(f) for f in sorted(SRC.rglob("*.html"))]
-    if not SHOW_GUIDES:
-        pages = [p for p in pages if not p["path"].startswith(GUIDE_PATHS)]
-        # Borrar las guías generadas en una ejecución anterior
-        for d in GUIDE_PATHS:
-            for f in sorted((ROOT / d).rglob("index.html"), reverse=True):
-                f.unlink()
-                for parent in f.parents:
-                    if parent == ROOT or any(parent.iterdir()):
-                        break
-                    parent.rmdir()
+    # Guías: cada artículo se publica con «published: true»; el índice de un idioma, si hay alguna
+    todas_las_guias = {p["path"] for p in pages if es_guia(p)}
+    con_guias = {p["lang"] for p in pages if p.get("type") == "article" and publicada(p)}
+    pages = [p for p in pages if not es_guia(p)
+             or (publicada(p) if p.get("type") == "article" else p["lang"] in con_guias)]
+    rutas = {p["path"] for p in pages}
     for p in pages:
-        out = ROOT / p["path"] / "index.html"
+        if es_guia(p) and p.get("alt") and p["alt"] not in rutas:
+            del p["alt"]  # su pareja en el otro idioma aún no está publicada: sin hreflang
+    ocultas = todas_las_guias - rutas
+    for p in pages:
+        p["body"] = sin_enlaces_ocultos(p["body"], ocultas)
+    # Borrar las guías generadas en una ejecución anterior que ya no se publican
+    for d in GUIDE_PATHS:
+        for f in sorted((ROOT / d).rglob("index.html"), reverse=True):
+            if f.parent.relative_to(ROOT).as_posix() + "/" not in rutas:
+                prune(f)
+    for p in pages:
+        out = ROOT / p["output"] if "output" in p else ROOT / p["path"] / "index.html"
         out.parent.mkdir(parents=True, exist_ok=True)
         out.write_text(layout(p, pages), encoding="utf-8", newline="\n")
         print("  ", out.relative_to(ROOT))

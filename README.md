@@ -28,6 +28,7 @@ _src/                         Contenido de cada página (esto es lo que se edita
   fiscalidad-nautica.html     -> /fiscalidad-nautica/
   consultoria-nautica.html    -> /consultoria-nautica/
   aviso-legal.html            -> /aviso-legal/ (aviso legal, privacidad y cookies)
+  404.html                    -> /404.html (página de error; la sirve .htaccess para cualquier dirección que no exista)
   guias/                      Guías (artículos) en español -> /guias/...
   en/                         Versión en inglés (/en/, /en/guides/...)
 build.py                      Genera las páginas, el sitemap.xml y las etiquetas hreflang
@@ -39,7 +40,7 @@ assets/                       CSS, JS e imágenes
 
 ## Cómo añadir una guía (artículo)
 
-> **Ahora mismo las guías están ocultas** (`SHOW_GUIDES = False` en `build.py`): no se generan ni se enlazan desde ningún sitio, y `.htaccess` redirige temporalmente (302) sus URL a la portada. Para publicarlas, pon `SHOW_GUIDES = True`, quita esas dos reglas de `.htaccess` y ejecuta `python build.py`. En los fragmentos, lo que enlaza a guías va entre `<!-- guides -->` y `<!-- /guides -->`.
+> **Cada guía se publica por separado.** Todas llevan `published: false` en su cabecera y no se generan. Para publicar una, pon `published: true` y ejecuta `python build.py`. Mientras tanto, `build.py` se ocupa del resto: el índice de guías, el menú «Guías» y el bloque de la portada aparecen solo si hay al menos una guía publicada en ese idioma; los enlaces a guías sin publicar se quitan solos (un punto de «Guías relacionadas» desaparece; en un texto, queda el texto sin enlace); y si la pareja en el otro idioma aún no está publicada, la guía no declara `hreflang` hacia ella. Lo que no está publicado devuelve la página 404. Para verlas todas en local: `GUIDES=all python build.py` (no guardes ese resultado).
 
 1. Copia un archivo de `_src/guias/` (o de `_src/en/guides/` para inglés) y cambia los metadatos de arriba:
 
@@ -122,6 +123,42 @@ En **Actions → Publicar en IONOS**, abrir la ejecución fallida y mirar el pas
 - `NOINDEX=0 python build.py` genera la versión del dominio real, como hace el workflow.
   No hace falta subirla a mano.
 
+## Sitemap y aviso a buscadores
+
+- `sitemap.xml` lleva `<lastmod>` en cada página: la fecha del último commit que tocó su archivo de `_src/` (en las guías, `modified:` o `date:`). Solo se calcula con el historial completo de git; en un clon superficial no se escribe, para no poner fechas falsas. Por eso el workflow de IONOS hace `fetch-depth: 0`.
+- `.github/scripts/indexnow.py` avisa a Bing y otros buscadores (IndexNow) de las páginas cambiadas en cada publicación. La clave es pública por diseño: `d5e2c2ee363eb2463d86370c2a3326f9.txt` en la raíz del sitio y la constante `KEY` del script deben coincidir. No falla si el servicio no responde. Prueba en local: `python .github/scripts/indexnow.py HEAD~3 --dry-run`.
+- Google no usa IndexNow: para Google vale el `sitemap.xml` enviado en Search Console.
+
+## Caché, compresión y seguridad (`.htaccess`)
+
+- **Caché:** CSS y JS se guardan un año y llevan su huella en la URL (`styles.css?v=e6a8137a`, la calcula `build.py`), así que al cambiar el archivo el navegador descarga el nuevo sin recargar a mano. Fuentes: un año. Imágenes: un mes. Páginas, sitemap y robots: el navegador pregunta siempre si han cambiado.
+- **Compresión** gzip/Brotli de texto (la portada baja de unos 24 KB a unos 6 KB).
+- **Cabeceras de seguridad:** `Content-Security-Policy`, `Strict-Transport-Security`, `X-Content-Type-Options`, `X-Frame-Options`, `Referrer-Policy` y `Permissions-Policy`. La política solo admite recursos propios, el mapa de Google bajo demanda y el único script en línea de la cabecera, identificado por su huella `sha256`.
+- Si se cambia ese script en `build.py`, hay que recalcular el `sha256` en `.htaccess`. Si se añade algo externo (analítica, formulario, vídeo…), hay que permitirlo en la política o el navegador lo bloqueará.
+- Todo está dentro de `<IfModule>`: si el hosting no tiene un módulo, esa parte no se aplica, pero la web sigue funcionando.
+- Probado con Apache 2.4 y un navegador real. En el hosting de IONOS se comprueba tras publicar con `curl -I https://www.globalnautica.com/` (deben salir las cabeceras `Content-Security-Policy`, `Cache-Control`…).
+
+## Imágenes
+
+- Cada `.jpg`/`.png` de `assets/img/` tiene un `.webp` al lado (un 35-40 % más ligero). `build.py` envuelve las imágenes en `<picture>` con el WebP y deja el JPG/PNG de respaldo.
+- Para una imagen nueva: ponla en `assets/img/`, ejecuta `pip install pillow && python .github/scripts/imagenes.py` y vuelve a ejecutar `python build.py`. El script genera los `.webp` y `logo-vela.jpg/.webp` (el recorte del logo que se ve en la cabecera, en vez de descargar el logo entero).
+- Las fotos actuales miden unos 510 px, así que no hay variantes de más tamaño: cuando lleguen las fotos propias en alta resolución (tarea de las fotos) conviene añadir `srcset` con varios anchos.
+- La imagen principal de la portada lleva `fetchpriority="high"`; las demás, `loading="lazy"`.
+- **Imagen para compartir** (WhatsApp, LinkedIn…): `compartir.jpg` (español) y `compartir-en.jpg` (inglés), de 1200×630. Se generan con `.github/scripts/compartir.html` (`?lang=es` / `?lang=en`), capturando la página a 1200×630 con Playwright en formato JPEG. Los metadatos (`og:image`, tamaño, texto alternativo y `twitter:card`) los añade `build.py`.
+
+## Comprobaciones antes de publicar
+
+`python .github/scripts/check.py` (solo necesita Python) falla si:
+
+1. el HTML guardado en el repositorio no es el que genera `python build.py` (alguien editó `_src/` sin regenerar) o hay páginas sobrantes;
+2. hay enlaces internos rotos: páginas, imágenes, CSS, JS o anclas `#…`;
+3. algún dato estructurado (JSON-LD) no es JSON válido;
+4. falta el título, la descripción, la URL canónica o `og:image` de una página, o se repiten entre páginas;
+5. una pareja `hreflang` español/inglés no existe o no se enlaza en los dos sentidos;
+6. el `sha256` del script en línea de la cabecera no coincide con el de la política de seguridad de `.htaccess`.
+
+Se ejecuta en cada PR (workflow `comprobar.yml`) y, antes de subir nada, en la publicación (`publicar-ionos.yml`): si falla, no se publica.
+
 ## SEO
 
 Ya hecho en el código:
@@ -166,7 +203,7 @@ Lo que hay que hacer fuera del código:
 - [ ] **WhatsApp:** el botón usa el móvil +34 637 742 113. Confirmar que ese número tiene WhatsApp.
 - [ ] **Atención en inglés:** las páginas de servicio dicen "Atención en español e inglés". Confirmar que es así.
 - [ ] **Textos de las páginas de servicio:** revisar las explicaciones fiscales y administrativas (IEDMT, importación temporal, Lista 6ª/7ª, ITB). Están redactadas de forma general, pero conviene que las valide alguien del oficio.
-- [ ] **Guías prácticas:** hay 5 guías en español y 5 en inglés escritas pero ocultas (matriculación, importación temporal, bandera extranjera, compraventa, Lista 6ª/7ª). Antes de publicarlas, que alguien del oficio revise las cifras y plazos.
+- [ ] **Guías prácticas:** hay 5 guías en español y 5 en inglés escritas pero sin publicar (`published: false`) (matriculación, importación temporal, bandera extranjera, compraventa, Lista 6ª/7ª). Antes de publicarlas, que alguien del oficio revise las cifras y plazos.
 - [ ] **Más guías:** seguir añadiendo artículos sobre lo que preguntan los clientes.
 - [ ] **Workflow de publicación:** GitHub avisa de que `actions/checkout@v4` y `actions/setup-python@v5` usan Node.js 20, que está obsoleto. Funciona, pero conviene subirlos a `actions/checkout@v5` y `actions/setup-python@v6` en `.github/workflows/publicar-ionos.yml`.
 - [ ] **Formulario de contacto:** ahora mismo es `mailto:`. Se podría usar Formspree, Netlify Forms o un PHP en el hosting.
