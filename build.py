@@ -446,7 +446,15 @@ def layout(p, pages):
     company = "\n".join(f'          <li><a href="{anchor(a)}">{label}</a></li>' for a, label in t["nav"] if a not in ("servicios", "services"))
     legal = "\n".join(f'          <li><a href="{link(r, u)}">{label}</a></li>' for u, label in t["legal"])
     legal_inline = " · ".join(f'<a href="{link(r, u)}">{label}</a>' for u, label in t["legal"])
-    robots = '  <meta name="robots" content="noindex">\n' if (NOINDEX or not indexable) else ""
+    # El workflow de publicación se niega a subir páginas con content="noindex" (señal de que se
+    # ha dejado NOINDEX activado). Las páginas que no se indexan por diseño, como la 404, usan
+    # «noindex, follow», que no activa esa alarma.
+    if NOINDEX:
+        robots = '  <meta name="robots" content="noindex">\n'
+    elif not indexable:
+        robots = '  <meta name="robots" content="noindex, follow">\n'
+    else:
+        robots = ""
     canon = f'  <link rel="canonical" href="{canonical}">\n{hreflang}\n' if indexable else ""
     og_url = f'  <meta property="og:url" content="{canonical}">\n' if indexable else ""
     share = SITE + t["og_image"]

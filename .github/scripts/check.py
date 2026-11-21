@@ -110,6 +110,14 @@ def comprobar_regenerado():
             error(str(f), "está en el repositorio pero build.py ya no la genera (borrarla)")
         for f in sorted(gen - repo):
             error(str(f), "build.py la genera pero no está en el repositorio (falta ejecutar build.py y guardar el resultado)")
+        # Lo mismo que hace el workflow al publicar: con NOINDEX=0 no puede quedar ninguna página con
+        # content="noindex" (si queda alguna, el workflow se niega a publicar)
+        r = subprocess.run([sys.executable, "build.py"], cwd=copia, env={**env, "NOINDEX": "0"}, capture_output=True, text=True)
+        if r.returncode == 0:
+            for f in paginas(copia):
+                if 'content="noindex"' in (copia / f).read_text(encoding="utf-8"):
+                    error(str(f), 'con NOINDEX=0 sigue llevando content="noindex": el workflow se negaría a publicar')
+            r = subprocess.run([sys.executable, "build.py"], cwd=copia, env=env, capture_output=True, text=True)
         quitar = lambda t: re.sub(r"[ \t]*<lastmod>[^<]*</lastmod>\n?", "", t)  # lastmod depende del historial de git
         for f in sorted(repo & gen) + [Path("sitemap.xml")]:
             a, b = (ROOT / f).read_text(encoding="utf-8"), (copia / f).read_text(encoding="utf-8")
