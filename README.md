@@ -162,6 +162,14 @@ En **Actions → Publicar en IONOS**, abrir la ejecución fallida y mirar el pas
 - Todo está dentro de `<IfModule>`: si el hosting no tiene un módulo, esa parte no se aplica, pero la web sigue funcionando.
 - Probado con Apache 2.4 y un navegador real. En el hosting de IONOS se comprueba tras publicar con `curl -I https://www.globalnautica.com/` (deben salir las cabeceras `Content-Security-Policy`, `Cache-Control`…).
 
+## Imágenes
+
+- Cada `.jpg`/`.png` de `assets/img/` tiene un `.webp` al lado (un 35-40 % más ligero). `build.py` envuelve las imágenes en `<picture>` con el WebP y deja el JPG/PNG de respaldo.
+- Para una imagen nueva: ponla en `assets/img/`, ejecuta `pip install pillow && python .github/scripts/imagenes.py` y vuelve a ejecutar `python build.py`. El script genera los `.webp` y `logo-vela.jpg/.webp` (el recorte del logo que se ve en la cabecera, en vez de descargar el logo entero).
+- Las fotos actuales miden unos 510 px, así que no hay variantes de más tamaño: cuando lleguen las fotos propias en alta resolución (tarea de las fotos) conviene añadir `srcset` con varios anchos.
+- La imagen principal de la portada lleva `fetchpriority="high"`; las demás, `loading="lazy"`.
+- **Imagen para compartir** (WhatsApp, LinkedIn…): `compartir.jpg` (español) y `compartir-en.jpg` (inglés), de 1200×630. Se generan con `.github/scripts/compartir.html` (`?lang=es` / `?lang=en`), capturando la página a 1200×630 con Playwright en formato JPEG. Los metadatos (`og:image`, tamaño, texto alternativo y `twitter:card`) los añade `build.py`.
+
 ## SEO
 
 Ya hecho en el código:

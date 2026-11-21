@@ -63,6 +63,8 @@ T = {
         "legal": [("aviso-legal/", "Aviso legal"), ("aviso-legal/#privacidad", "Privacidad"), ("aviso-legal/#cookies", "Cookies")],
         "funding": "Global Nautica ha recibido una ayuda de la Unión Europea con cargo al Fondo NextGenerationEU, en el marco del Plan de Recuperación, Transformación y Resiliencia, para la adquisición de vehículo eléctrico enchufable dentro del Programa de incentivos a la movilidad eficiente y sostenible (Programa MOVES III Andalucía) del Ministerio para la Transición Ecológica y el Reto Demográfico, gestionado por la Junta de Andalucía, a través de la Agencia Andaluza de la Energía.",
         "locale": "es_ES",
+        "og_image": "assets/img/compartir.jpg",
+        "og_alt": "Global Nautica: consultoría náutica en la Costa del Sol",
         "guides": ("guias/", "Guías"),
         "months": ["enero", "febrero", "marzo", "abril", "mayo", "junio", "julio", "agosto",
                    "septiembre", "octubre", "noviembre", "diciembre"],
@@ -113,6 +115,8 @@ T = {
         "legal": [("en/legal-notice/", "Legal notice"), ("en/legal-notice/#privacy", "Privacy"), ("en/legal-notice/#cookies", "Cookies")],
         "funding": "Global Nautica has received European Union funding from the NextGenerationEU Fund, under the Recovery, Transformation and Resilience Plan, for the purchase of a plug-in electric vehicle within the MOVES III Andalucía programme of the Spanish Ministry for the Ecological Transition and the Demographic Challenge, managed by the Junta de Andalucía through the Andalusian Energy Agency.",
         "locale": "en_GB",
+        "og_image": "assets/img/compartir-en.jpg",
+        "og_alt": "Global Nautica: nautical consultancy on the Costa del Sol",
         "guides": ("en/guides/", "Guides"),
         "months": ["January", "February", "March", "April", "May", "June", "July", "August",
                    "September", "October", "November", "December"],
@@ -211,6 +215,20 @@ def git(*args):
 # En un clon superficial (el de GitHub Actions por defecto) todos los archivos parecerían
 # modificados en el último commit, así que no se calcula lastmod hasta tener el historial.
 SHALLOW = git("rev-parse", "--is-shallow-repository") != "false"
+
+
+IMG_RE = re.compile(r'<img src="([^"]*assets/img/([\w-]+)\.(?:jpg|png))"([^>]*)>')
+
+
+def picturize(page):
+    """Envuelve cada <img> que tenga su versión .webp en <picture>, dejando el JPG/PNG de respaldo.
+    Las variantes se generan con .github/scripts/imagenes.py."""
+    def uno(m):
+        src, name, rest = m.groups()
+        if not (ROOT / "assets" / "img" / f"{name}.webp").exists():
+            return m.group(0)
+        return f'<picture><source srcset="{src.rsplit(".", 1)[0]}.webp" type="image/webp"><img src="{src}"{rest}></picture>'
+    return IMG_RE.sub(uno, page)
 
 
 def asset(r, path):
@@ -561,7 +579,7 @@ def layout(p, pages):
     robots = '  <meta name="robots" content="noindex">\n' if (NOINDEX or not indexable) else ""
     canon = f'  <link rel="canonical" href="{canonical}">\n{hreflang}\n' if indexable else ""
     og_url = f'  <meta property="og:url" content="{canonical}">\n' if indexable else ""
-    image = SITE + p.get("image", "assets/img/cabos-cubierta.jpg")
+    share = SITE + t["og_image"]
     if is_article:
         body = article_body(p, pages, r)
     elif is_tramite:
@@ -577,7 +595,7 @@ def layout(p, pages):
     body = body.replace("{{R}}", r)
     og_type = "article" if is_article else "website"
 
-    return f"""<!doctype html>
+    page = f"""<!doctype html>
 <html lang="{p['lang']}">
 <head>
   <meta charset="utf-8">
@@ -592,7 +610,12 @@ def layout(p, pages):
   <meta property="og:locale" content="{t['locale']}">
   <meta property="og:title" content="{p['title']}">
   <meta property="og:description" content="{p['description']}">
-{og_url}  <meta property="og:image" content="{image}">
+{og_url}  <meta property="og:image" content="{share}">
+  <meta property="og:image:type" content="image/jpeg">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="{t['og_alt']}">
+  <meta name="twitter:card" content="summary_large_image">
 
   <link rel="stylesheet" href="{asset(r, 'assets/css/fonts.css')}">
   <link rel="stylesheet" href="{asset(r, 'assets/css/styles.css')}">
@@ -607,7 +630,7 @@ def layout(p, pages):
   <header class="site-header" data-header>
     <div class="container header-inner">
       <a href="{home if not is_home else '#inicio'}" class="brand" aria-label="{t['home_label']}">
-        <span class="brand-mark"><img src="{r}assets/img/logo-original.jpg" alt="" width="598" height="110"></span>
+        <span class="brand-mark"><img src="{r}assets/img/logo-vela.jpg" alt="" width="90" height="110"></span>
         <span class="brand-name">Global Nautica</span>
       </a>
 
@@ -637,7 +660,7 @@ def layout(p, pages):
     <div class="container footer-grid">
       <div>
         <a href="{home}" class="brand brand-footer">
-          <span class="brand-mark"><img src="{r}assets/img/logo-original.jpg" alt="" width="598" height="110"></span>
+          <span class="brand-mark"><img src="{r}assets/img/logo-vela.jpg" alt="" width="90" height="110"></span>
           <span class="brand-name">Global Nautica</span>
         </a>
         <p class="footer-tag">{t['tag']}</p>
@@ -680,6 +703,7 @@ def layout(p, pages):
 </body>
 </html>
 """
+    return picturize(page)
 
 
 def sitemap(pages):
