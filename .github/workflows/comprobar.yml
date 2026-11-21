@@ -1,0 +1,23 @@
+# Comprueba la web en cada pull request, antes de aceptarla: enlaces, HTML generado al día,
+# datos estructurados, metadatos, hreflang y política de seguridad (.github/scripts/check.py).
+# No usa secretos ni publica nada.
+
+name: Comprobar la web
+
+on:
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  comprobar:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+
+      - name: Comprobar la web
+        run: python .github/scripts/check.py
