@@ -40,7 +40,7 @@ assets/                       CSS, JS e imágenes
 
 ## Cómo añadir una guía (artículo)
 
-> **Ahora mismo las guías están ocultas** (`SHOW_GUIDES = False` en `build.py`): no se generan ni se enlazan desde ningún sitio, y `.htaccess` redirige temporalmente (302) sus URL a la portada. Para publicarlas, pon `SHOW_GUIDES = True`, quita esas dos reglas de `.htaccess` y ejecuta `python build.py`. En los fragmentos, lo que enlaza a guías va entre `<!-- guides -->` y `<!-- /guides -->`.
+> **Cada guía se publica por separado.** Todas llevan `published: false` en su cabecera y no se generan. Para publicar una, pon `published: true` y ejecuta `python build.py`. Mientras tanto, `build.py` se ocupa del resto: el índice de guías, el menú «Guías» y el bloque de la portada aparecen solo si hay al menos una guía publicada en ese idioma; los enlaces a guías sin publicar se quitan solos (un punto de «Guías relacionadas» desaparece; en un texto, queda el texto sin enlace); y si la pareja en el otro idioma aún no está publicada, la guía no declara `hreflang` hacia ella. Lo que no está publicado devuelve la página 404. Para verlas todas en local: `GUIDES=all python build.py` (no guardes ese resultado).
 
 1. Copia un archivo de `_src/guias/` (o de `_src/en/guides/` para inglés) y cambia los metadatos de arriba:
 
@@ -227,7 +227,7 @@ Lo que hay que hacer fuera del código:
 - [ ] **WhatsApp:** el botón usa el móvil +34 637 742 113. Confirmar que ese número tiene WhatsApp.
 - [ ] **Atención en inglés:** las páginas de servicio dicen "Atención en español e inglés". Confirmar que es así.
 - [ ] **Textos de las páginas de servicio:** revisar las explicaciones fiscales y administrativas (IEDMT, importación temporal, Lista 6ª/7ª, ITB). Están redactadas de forma general, pero conviene que las valide alguien del oficio.
-- [ ] **Guías prácticas:** hay 5 guías en español y 5 en inglés escritas pero ocultas (matriculación, importación temporal, bandera extranjera, compraventa, Lista 6ª/7ª). Antes de publicarlas, que alguien del oficio revise las cifras y plazos.
+- [ ] **Guías prácticas:** hay 5 guías en español y 5 en inglés escritas pero sin publicar (`published: false`) (matriculación, importación temporal, bandera extranjera, compraventa, Lista 6ª/7ª). Antes de publicarlas, que alguien del oficio revise las cifras y plazos.
 - [ ] **Más guías:** seguir añadiendo artículos sobre lo que preguntan los clientes.
 - [ ] **Workflow de publicación:** GitHub avisa de que `actions/checkout@v4` y `actions/setup-python@v5` usan Node.js 20, que está obsoleto. Funciona, pero conviene subirlos a `actions/checkout@v5` y `actions/setup-python@v6` en `.github/workflows/publicar-ionos.yml`.
 - [ ] **Formulario de contacto:** ahora mismo es `mailto:`. Se podría usar Formspree, Netlify Forms o un PHP en el hosting.

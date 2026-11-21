@@ -33,11 +33,11 @@ MAPS_URL = "https://www.google.es/maps/place/Global+Nautica/@36.4167014,-5.15771
 # (.github/workflows/publicar-ionos.yml) genera la web con NOINDEX=0.
 NOINDEX = os.environ.get("NOINDEX", "1") != "0"
 
-# Las guías (_src/guias/ y _src/en/guides/) están ocultas. Con False no se generan,
-# y se quitan sus enlaces del menú, el pie, la portada y los servicios (los bloques
-# marcados con <!-- guides --> ... <!-- /guides -->). Mientras estén ocultas,
-# .htaccess redirige temporalmente sus URL a la portada.
-SHOW_GUIDES = False
+# Guías (_src/guias/ y _src/en/guides/): cada una se publica con «published: true» en su cabecera.
+# El índice, el menú «Guías» y los bloques marcados con <!-- guides --> ... <!-- /guides -->
+# aparecen solo si hay al menos una guía publicada en ese idioma. Los enlaces a guías sin
+# publicar se quitan solos. Para ver todas en local: GUIDES=all python build.py
+SHOW_GUIDES = os.environ.get("GUIDES", "") == "all"
 GUIDE_PATHS = ("guias/", "en/guides/")
 
 # Páginas con «draft: true» en su cabecera no se generan (sirven para probar plantillas).
@@ -295,6 +295,17 @@ def guide_cards(guides, r, lang):
     return '        <div class="guides-grid">\n' + "\n".join(cards) + "\n        </div>"
 
 
+def sin_enlaces_ocultos(body, ocultas):
+    """Quita los enlaces a guías sin publicar: sus puntos de las listas de guías relacionadas
+    (y la lista entera si se queda vacía) y, dentro de un texto, deja solo el texto."""
+    guia = r'\{\{R\}\}((?:guias|en/guides)/[^"#]*)'
+    body = re.sub(r'[ \t]*<li><a href="' + guia + r'"[^>]*>[^\n]*?</a></li>\n?',
+                  lambda m: "" if m.group(1) in ocultas else m.group(0), body)
+    body = re.sub(r'[ \t]*<aside class="related-guides">\s*<p class="related-guides-title">[^<]*</p>\s*<ul>\s*</ul>\s*</aside>\n?', "", body)
+    return re.sub(r'<a href="' + guia + r'"[^>]*>(.*?)</a>',
+                  lambda m: m.group(2) if m.group(1) in ocultas else m.group(0), body, flags=re.S)
+
+
 def plain(fragment):
     """Texto sin etiquetas, con las entidades resueltas y los espacios normalizados."""
     return re.sub(r"\s+", " ", unescape(re.sub(r"<[^>]+>", " ", fragment))).strip()
@@ -431,6 +442,17 @@ def article_body(p, pages, r):
         if service_label else ""
     )
     others = [g for g in guides_of(pages, lang) if g["path"] != p["path"]][:3]
+    more = f"""
+    <section class="section section-tint">
+      <div class="container">
+        <header class="section-head">
+          <p class="eyebrow">{a['more']}</p>
+          <h2>{a['more_title']}</h2>
+        </header>
+{guide_cards(others, r, lang)}
+      </div>
+    </section>
+""" if others else ""
     return f"""    <section class="page-hero article-hero">
       <div class="container">
         <nav class="breadcrumb" aria-label="{'Ruta' if lang == 'es' else 'Breadcrumb'}"><a href="{link(r, t['home'])}">{a['home']}</a> <span aria-hidden="true">/</span> <a href="{link(r, guides_path)}">{guides_label}</a> <span aria-hidden="true">/</span> <span>{p['category']}</span></nav>
@@ -451,17 +473,7 @@ def article_body(p, pages, r):
 {side_card(a, a['subject'], service_link)}
       </div>
     </section>
-
-    <section class="section section-tint">
-      <div class="container">
-        <header class="section-head">
-          <p class="eyebrow">{a['more']}</p>
-          <h2>{a['more_title']}</h2>
-        </header>
-{guide_cards(others, r, lang)}
-      </div>
-    </section>
-
+{more}
 {cta_band(a)}
 """
 
@@ -544,9 +556,10 @@ def layout(p, pages):
         f'  <script type="application/ld+json">{json.dumps(s, ensure_ascii=False)}</script>' for s in schema
     )
 
+    guides_on = bool(guides_of(pages, p["lang"]))  # hay alguna guía publicada en este idioma
     guides_li = f'          <li><a href="{link(r, t["guides"][0])}">{t["guides"][1]}</a></li>'
     nav_items = [f'          <li><a href="{anchor(a)}">{label}</a></li>' for a, label in t["nav"]]
-    if SHOW_GUIDES:
+    if guides_on:
         nav_items.insert(2, guides_li)  # Quiénes somos, Servicios, Guías, Recursos, Contacto
     else:
         guides_li = ""
@@ -591,7 +604,7 @@ def layout(p, pages):
                 .replace("{{GUIDES_LATEST}}", guide_cards(guides[:3], r, p["lang"]))
                 .replace("{{TRAMITES}}\n\n", (tramites_section(pages, p, r) + "\n") if tramites_of(pages, p["path"], p["lang"]) else ""))
     guides_block = re.compile(r"[ \t]*<!-- guides -->.*?<!-- /guides -->\n?", re.S)
-    body = guides_block.sub("", body) if not SHOW_GUIDES else body.replace("<!-- guides -->\n", "").replace("<!-- /guides -->\n", "")
+    body = guides_block.sub("", body) if not guides_on else body.replace("<!-- guides -->\n", "").replace("<!-- /guides -->\n", "")
     body = body.replace("{{R}}", r)
     og_type = "article" if is_article else "website"
 
@@ -736,6 +749,14 @@ def prune(f):
         parent.rmdir()
 
 
+def es_guia(p):
+    return p["path"].startswith(GUIDE_PATHS)
+
+
+def publicada(p):
+    return SHOW_GUIDES or p.get("published") == "true"
+
+
 def main():
     pages = [parse(f) for f in sorted(SRC.rglob("*.html"))]
     if not SHOW_DRAFTS:
@@ -744,11 +765,23 @@ def main():
             if p.get("draft") == "true" and (ROOT / p["path"] / "index.html").exists():
                 prune(ROOT / p["path"] / "index.html")
         pages = [p for p in pages if p.get("draft") != "true"]
-    if not SHOW_GUIDES:
-        pages = [p for p in pages if not p["path"].startswith(GUIDE_PATHS)]
-        # Borrar las guías generadas en una ejecución anterior
-        for d in GUIDE_PATHS:
-            for f in sorted((ROOT / d).rglob("index.html"), reverse=True):
+
+    # Guías: cada artículo se publica con «published: true»; el índice de un idioma, si hay alguna
+    todas_las_guias = {p["path"] for p in pages if es_guia(p)}
+    con_guias = {p["lang"] for p in pages if p.get("type") == "article" and publicada(p)}
+    pages = [p for p in pages if not es_guia(p)
+             or (publicada(p) if p.get("type") == "article" else p["lang"] in con_guias)]
+    rutas = {p["path"] for p in pages}
+    for p in pages:
+        if es_guia(p) and p.get("alt") and p["alt"] not in rutas:
+            del p["alt"]  # su pareja en el otro idioma aún no está publicada: sin hreflang
+    ocultas = todas_las_guias - rutas
+    for p in pages:
+        p["body"] = sin_enlaces_ocultos(p["body"], ocultas)
+    # Borrar las guías generadas en una ejecución anterior que ya no se publican
+    for d in GUIDE_PATHS:
+        for f in sorted((ROOT / d).rglob("index.html"), reverse=True):
+            if f.parent.relative_to(ROOT).as_posix() + "/" not in rutas:
                 prune(f)
     for p in pages:
         out = ROOT / p["output"] if "output" in p else ROOT / p["path"] / "index.html"

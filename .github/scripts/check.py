@@ -100,6 +100,7 @@ def comprobar_regenerado():
         shutil.copytree(ROOT, copia, ignore=shutil.ignore_patterns(".git", "publicar", "node_modules"))
         env = {**os.environ, "NOINDEX": "1"}
         env.pop("DRAFTS", None)
+        env.pop("GUIDES", None)
         r = subprocess.run([sys.executable, "build.py"], cwd=copia, env=env, capture_output=True, text=True)
         if r.returncode != 0:
             error("build.py", "falla al generar la web:\n" + (r.stderr or r.stdout)[-600:])
