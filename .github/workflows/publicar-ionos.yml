@@ -1,6 +1,9 @@
 # Publica la web en el hosting de IONOS (www.globalnautica.com) cada vez que
 # se actualiza main, o a mano desde la pestaña Actions ("Run workflow").
 #
+# Antes de publicar comprueba la web (.github/scripts/check.py) y después de subirla avisa a los
+# buscadores (.github/scripts/indexnow.py).
+#
 # Necesita estos secretos en Settings → Secrets and variables → Actions:
 #   IONOS_SFTP_HOST      p. ej. access-5012345678.webspace-host.com
 #   IONOS_SFTP_USER      usuario SFTP creado en IONOS (Hosting → SFTP y SSH)
@@ -47,11 +50,17 @@ jobs:
 
       - uses: actions/checkout@v5
         if: steps.config.outputs.listo == 'true'
+        with:
+          fetch-depth: 0  # historial completo: lo necesitan <lastmod> del sitemap e IndexNow
 
       - uses: actions/setup-python@v6
         if: steps.config.outputs.listo == 'true'
         with:
           python-version: "3.12"
+
+      - name: Comprobar enlaces, HTML generado, datos estructurados y metadatos
+        if: steps.config.outputs.listo == 'true'
+        run: python .github/scripts/check.py
 
       - name: Generar la web sin noindex
         if: steps.config.outputs.listo == 'true'
@@ -79,3 +88,8 @@ jobs:
             open -u \"$SFTP_USER\",\"$SFTP_PASSWORD\" sftp://$SFTP_HOST; \
             mkdir -p -f \"$SFTP_DIR\"; \
             mirror --reverse --delete --verbose --parallel=4 \"$RUNNER_TEMP/web/\" \"$SFTP_DIR\""
+
+      - name: Avisar a Bing y otros buscadores (IndexNow)
+        if: steps.config.outputs.listo == 'true'
+        continue-on-error: true  # el aviso es opcional: no debe hacer fallar la publicación
+        run: python .github/scripts/indexnow.py "${{ github.event.before }}"
