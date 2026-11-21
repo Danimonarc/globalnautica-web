@@ -14,6 +14,7 @@ Marcadores disponibles en los fragmentos:
 Los artículos (type: article) solo contienen el texto: la cabecera, el
 contacto lateral y las guías relacionadas los añade article_body().
 """
+import hashlib
 import json
 import os
 import re
@@ -210,6 +211,12 @@ def git(*args):
 # En un clon superficial (el de GitHub Actions por defecto) todos los archivos parecerían
 # modificados en el último commit, así que no se calcula lastmod hasta tener el historial.
 SHALLOW = git("rev-parse", "--is-shallow-repository") != "false"
+
+
+def asset(r, path):
+    """Ruta de un CSS o JS con su huella (?v=…): al cambiar el archivo cambia la URL, y así
+    el navegador puede guardarlo un año (ver la caché de .htaccess)."""
+    return f"{r}{path}?v={hashlib.sha256((ROOT / path).read_bytes()).hexdigest()[:8]}"
 
 
 def last_modified(p):
@@ -586,8 +593,8 @@ def layout(p, pages):
   <meta property="og:url" content="{canonical}">
   <meta property="og:image" content="{image}">
 
-  <link rel="stylesheet" href="{r}assets/css/fonts.css">
-  <link rel="stylesheet" href="{r}assets/css/styles.css">
+  <link rel="stylesheet" href="{asset(r, 'assets/css/fonts.css')}">
+  <link rel="stylesheet" href="{asset(r, 'assets/css/styles.css')}">
   <script>document.documentElement.classList.add("js");</script>
 {ld}
 </head>
@@ -668,7 +675,7 @@ def layout(p, pages):
     </div>
   </footer>
 
-  <script src="{r}assets/js/main.js" defer></script>
+  <script src="{asset(r, 'assets/js/main.js')}" defer></script>
 </body>
 </html>
 """

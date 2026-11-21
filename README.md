@@ -152,6 +152,15 @@ En **Actions → Publicar en IONOS**, abrir la ejecución fallida y mirar el pas
 - `.github/scripts/indexnow.py` avisa a Bing y otros buscadores (IndexNow) de las páginas cambiadas en cada publicación. La clave es pública por diseño: `d5e2c2ee363eb2463d86370c2a3326f9.txt` en la raíz del sitio y la constante `KEY` del script deben coincidir. No falla si el servicio no responde. Prueba en local: `python .github/scripts/indexnow.py HEAD~3 --dry-run`.
 - Google no usa IndexNow: para Google vale el `sitemap.xml` enviado en Search Console.
 
+## Caché, compresión y seguridad (`.htaccess`)
+
+- **Caché:** CSS y JS se guardan un año y llevan su huella en la URL (`styles.css?v=e6a8137a`, la calcula `build.py`), así que al cambiar el archivo el navegador descarga el nuevo sin recargar a mano. Fuentes: un año. Imágenes: un mes. Páginas, sitemap y robots: el navegador pregunta siempre si han cambiado.
+- **Compresión** gzip/Brotli de texto (la portada baja de unos 24 KB a unos 6 KB).
+- **Cabeceras de seguridad:** `Content-Security-Policy`, `Strict-Transport-Security`, `X-Content-Type-Options`, `X-Frame-Options`, `Referrer-Policy` y `Permissions-Policy`. La política solo admite recursos propios, el mapa de Google bajo demanda y el único script en línea de la cabecera, identificado por su huella `sha256`.
+- Si se cambia ese script en `build.py`, hay que recalcular el `sha256` en `.htaccess`. Si se añade algo externo (analítica, formulario, vídeo…), hay que permitirlo en la política o el navegador lo bloqueará.
+- Todo está dentro de `<IfModule>`: si el hosting no tiene un módulo, esa parte no se aplica, pero la web sigue funcionando.
+- Probado con Apache 2.4 y un navegador real. En el hosting de IONOS se comprueba tras publicar con `curl -I https://www.globalnautica.com/` (deben salir las cabeceras `Content-Security-Policy`, `Cache-Control`…).
+
 ## SEO
 
 Ya hecho en el código:
