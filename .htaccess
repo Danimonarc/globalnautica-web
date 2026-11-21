@@ -7,6 +7,17 @@ RewriteCond %{HTTPS} off [OR]
 RewriteCond %{HTTP_HOST} !^www\.globalnautica\.com$ [NC]
 RewriteRule ^(.*)$ https://www.globalnautica.com/$1 [R=301,L]
 
+# Una sola URL por página: /index.html y /en/index.html (y las de cada carpeta)
+# redirigen a la carpeta (/ y /en/). Se mira la petición original (THE_REQUEST) para
+# no entrar en bucle con el index.html que Apache sirve por dentro.
+RewriteCond %{THE_REQUEST} \s/+(.*/)?index\.html[\s?] [NC]
+RewriteRule ^(.*/)?index\.html$ /$1 [R=301,L,NC]
+
+# Archivos ocultos (.htaccess, .git, .env…): prohibidos, salvo .well-known.
+# Evita además que el corrector de URLs del hosting liste esos archivos al pedir
+# una dirección parecida.
+RewriteRule (^|/)\.(?!well-known/) - [F]
+
 # Página propia para las direcciones que no existen (mantiene el código 404)
 ErrorDocument 404 /404.html
 
