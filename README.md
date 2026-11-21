@@ -61,6 +61,30 @@ assets/                       CSS, JS e imágenes
 2. Escribe solo el texto del artículo (párrafos, `<h2>`, listas, preguntas frecuentes...). La cabecera, el contacto lateral, las guías relacionadas, los datos estructurados y el tiempo de lectura los añade `build.py`.
 3. Ejecuta `python build.py`. La guía aparece sola en el índice de guías, en la portada (si es de las tres más recientes) y en el `sitemap.xml`.
 
+## Cómo añadir una página de trámite
+
+Una página de trámite cuelga de una página de servicio (fiscalidad o consultoría) y trata un solo trámite: importación temporal, IEDMT, inspecciones AEAT-Aduanas…
+
+1. Copia `_src/tramites/ejemplo.html` (español) y `_src/en/procedures/example.html` (inglés) y cambia la cabecera:
+
+   ```
+   lang: es
+   type: tramite
+   path: fiscalidad-nautica/importacion-temporal/    URL (siempre dentro de la del servicio)
+   parent: fiscalidad-nautica/                       página de servicio de la que cuelga
+   alt: en/yacht-tax-vat-spain/temporary-admission/  su versión en el otro idioma
+   order: 1                                          opcional: orden en los listados
+   service: Importación temporal                     nombre del trámite (datos estructurados)
+   headline: Importación temporal de embarcaciones   título visible (H1)
+   summary: Frase que sale bajo el título y en las tarjetas
+   title: Título para Google
+   description: Descripción para Google
+   ```
+
+2. Quita `draft: true` para publicarla. Mientras lo lleve, no se genera (para verla en local: `DRAFTS=1 python build.py`).
+3. Escribe solo el texto (`<h2>`, listas, `<div class="faq">`…). La cabecera, las migas de pan, la tarjeta de contacto, los «Otros trámites» y los datos estructurados los añade `build.py`.
+4. Ejecuta `python build.py`. El trámite aparece solo en el bloque «Trámites que gestionamos» de su página de servicio (marcador `{{TRAMITES}}`, que no muestra nada si el servicio aún no tiene trámites) y en el `sitemap.xml`.
+
 ## Publicación en IONOS
 
 ### Cómo funciona

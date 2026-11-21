@@ -37,6 +37,10 @@ NOINDEX = os.environ.get("NOINDEX", "1") != "0"
 SHOW_GUIDES = False
 GUIDE_PATHS = ("guias/", "en/guides/")
 
+# Páginas con «draft: true» en su cabecera no se generan (sirven para probar plantillas).
+# Para verlas en local: DRAFTS=1 python build.py
+SHOW_DRAFTS = os.environ.get("DRAFTS", "0") == "1"
+
 T = {
     "es": {
         "skip": "Saltar al contenido",
@@ -78,6 +82,15 @@ T = {
             "cta_text": "Teléfono, email o WhatsApp. También puede visitarnos en el edificio Puertosol, en Estepona.",
             "email_btn": "Escribir un email",
         },
+        "tr": {
+            "section_eyebrow": "Trámites",
+            "section_title": "Trámites que gestionamos",
+            "view": "Ver trámite",
+            "others_eyebrow": "Otros trámites",
+            "others_title": "Más trámites relacionados",
+            "subject": "Consulta sobre un trámite",
+            "service_label": "Servicio",
+        },
     },
     "en": {
         "skip": "Skip to content",
@@ -118,6 +131,15 @@ T = {
             "cta_title": "Questions about your case?",
             "cta_text": "Phone, email or WhatsApp. You are also welcome at our office in the Puertosol building, Estepona.",
             "email_btn": "Send an email",
+        },
+        "tr": {
+            "section_eyebrow": "Procedures",
+            "section_title": "Procedures we handle",
+            "view": "View procedure",
+            "others_eyebrow": "Other procedures",
+            "others_title": "More related procedures",
+            "subject": "Enquiry about a procedure",
+            "service_label": "Service",
         },
     },
 }
@@ -220,6 +242,116 @@ def guide_cards(guides, r, lang):
     return '        <div class="guides-grid">\n' + "\n".join(cards) + "\n        </div>"
 
 
+def page_by_path(pages, path):
+    return next((x for x in pages if x["path"] == path), None)
+
+
+def side_card(a, subject, service_link=""):
+    """Tarjeta lateral de contacto (artículos y trámites)."""
+    subject = subject.replace(" ", "%20")
+    return f"""        <aside class="side-card" aria-label="{a['side_eyebrow']}">
+          <p class="eyebrow">{a['side_eyebrow']}</p>
+          <p class="side-title">{a['side_title']}</p>
+          <p>{a['side_text']}</p>
+          <a class="btn btn-brass" href="mailto:info@globalnautica.com?subject={subject}">{a['email_btn']}</a>
+          <a class="btn btn-ghost-dark" href="https://wa.me/34637742113" target="_blank" rel="noopener">WhatsApp</a>
+          <a class="btn btn-ghost-dark" href="tel:+34952808606">+34 952 808 606</a>{service_link}
+        </aside>"""
+
+
+def cta_band(a):
+    return f"""    <section class="cta-band">
+      <div class="container cta-inner">
+        <div>
+          <h2>{a['cta_title']}</h2>
+          <p>{a['cta_text']}</p>
+        </div>
+        <div class="cta-actions">
+          <a class="btn btn-brass" href="tel:+34952808606">+34 952 808 606</a>
+          <a class="btn btn-ghost" href="mailto:info@globalnautica.com">info@globalnautica.com</a>
+        </div>
+      </div>
+    </section>"""
+
+
+def tramites_of(pages, parent, lang):
+    """Trámites de una página de servicio, por el campo opcional «order» y luego por título."""
+    items = [x for x in pages if x.get("type") == "tramite" and x.get("parent") == parent and x["lang"] == lang]
+    return sorted(items, key=lambda x: (int(x.get("order", 99)), x["headline"]))
+
+
+def tramite_cards(items, r, lang):
+    view = T[lang]["tr"]["view"]
+    cards = "\n".join(
+        f'          <a class="related-card" href="{link(r, x["path"])}"><h3>{x["headline"]}</h3><p>{x["summary"]}</p><span class="link-arrow">{view} →</span></a>'
+        for x in items
+    )
+    return f'        <div class="related">\n{cards}\n        </div>'
+
+
+def tramites_section(pages, p, r):
+    """Bloque {{TRAMITES}} de una página de servicio; vacío si todavía no tiene trámites."""
+    items = tramites_of(pages, p["path"], p["lang"])
+    if not items:
+        return ""
+    tr = T[p["lang"]]["tr"]
+    return f"""    <section class="section tramites">
+      <div class="container">
+        <header class="section-head">
+          <p class="eyebrow">{tr['section_eyebrow']}</p>
+          <h2>{tr['section_title']}</h2>
+        </header>
+{tramite_cards(items, r, p["lang"])}
+      </div>
+    </section>
+"""
+
+
+def tramite_body(p, pages, r):
+    """Página de un trámite concreto, colgada de una página de servicio (campo «parent»)."""
+    lang = p["lang"]
+    t = T[lang]
+    a = t["a"]
+    tr = t["tr"]
+    parent = page_by_path(pages, p.get("parent", ""))
+    if not parent:
+        raise SystemExit(f"{p['path']}: el campo «parent» ({p.get('parent')!r}) no es una página existente")
+    others = [x for x in tramites_of(pages, parent["path"], lang) if x["path"] != p["path"]]
+    service_link = f'\n          <a class="side-service" href="{link(r, parent["path"])}">{tr["service_label"]}: <strong>{parent["service"]}</strong> →</a>'
+    more = (f"""
+    <section class="section section-tint">
+      <div class="container">
+        <header class="section-head">
+          <p class="eyebrow">{tr['others_eyebrow']}</p>
+          <h2>{tr['others_title']}</h2>
+        </header>
+{tramite_cards(others, r, lang)}
+      </div>
+    </section>
+""" if others else "")
+    return f"""    <section class="page-hero">
+      <div class="container">
+        <nav class="breadcrumb" aria-label="{'Ruta' if lang == 'es' else 'Breadcrumb'}"><a href="{link(r, t['home'])}">{a['home']}</a> <span aria-hidden="true">/</span> <a href="{link(r, parent['path'])}">{parent['service']}</a> <span aria-hidden="true">/</span> <span>{p['headline']}</span></nav>
+        <p class="eyebrow">{parent['service']}</p>
+        <h1>{p['headline']}</h1>
+        <p class="lead">{p['summary']}</p>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="container article-grid">
+        <article class="prose">
+{p['body'].rstrip()}
+        </article>
+
+{side_card(a, tr['subject'], service_link)}
+      </div>
+    </section>
+{more}
+{cta_band(a)}
+"""
+
+
 def article_body(p, pages, r):
     """Envuelve el texto de un artículo con su cabecera, contacto lateral y guías relacionadas."""
     lang = p["lang"]
@@ -232,7 +364,6 @@ def article_body(p, pages, r):
         if service_label else ""
     )
     others = [g for g in guides_of(pages, lang) if g["path"] != p["path"]][:3]
-    subject = a["subject"].replace(" ", "%20")
     return f"""    <section class="page-hero article-hero">
       <div class="container">
         <nav class="breadcrumb" aria-label="{'Ruta' if lang == 'es' else 'Breadcrumb'}"><a href="{link(r, t['home'])}">{a['home']}</a> <span aria-hidden="true">/</span> <a href="{link(r, guides_path)}">{guides_label}</a> <span aria-hidden="true">/</span> <span>{p['category']}</span></nav>
@@ -250,14 +381,7 @@ def article_body(p, pages, r):
           <p class="article-disclaimer">{a['disclaimer']}</p>
         </article>
 
-        <aside class="side-card" aria-label="{a['side_eyebrow']}">
-          <p class="eyebrow">{a['side_eyebrow']}</p>
-          <p class="side-title">{a['side_title']}</p>
-          <p>{a['side_text']}</p>
-          <a class="btn btn-brass" href="mailto:info@globalnautica.com?subject={subject}">{a['email_btn']}</a>
-          <a class="btn btn-ghost-dark" href="https://wa.me/34637742113" target="_blank" rel="noopener">WhatsApp</a>
-          <a class="btn btn-ghost-dark" href="tel:+34952808606">+34 952 808 606</a>{service_link}
-        </aside>
+{side_card(a, a['subject'], service_link)}
       </div>
     </section>
 
@@ -271,18 +395,7 @@ def article_body(p, pages, r):
       </div>
     </section>
 
-    <section class="cta-band">
-      <div class="container cta-inner">
-        <div>
-          <h2>{a['cta_title']}</h2>
-          <p>{a['cta_text']}</p>
-        </div>
-        <div class="cta-actions">
-          <a class="btn btn-brass" href="tel:+34952808606">+34 952 808 606</a>
-          <a class="btn btn-ghost" href="mailto:info@globalnautica.com">info@globalnautica.com</a>
-        </div>
-      </div>
-    </section>
+{cta_band(a)}
 """
 
 
@@ -291,6 +404,7 @@ def layout(p, pages):
     path = p["path"]
     r = rel(depth_of(path))
     is_article = p.get("type") == "article"
+    is_tramite = p.get("type") == "tramite"
     is_home = path == t["home"]
     home = link(r, t["home"])
     anchor = (lambda a: "#" + a) if is_home else (lambda a: home + "#" + a)
@@ -334,6 +448,9 @@ def layout(p, pages):
         crumbs = [("Global Nautica", SITE + t["home"])]
         if is_article:
             crumbs.append((t["guides"][1], SITE + t["guides"][0]))
+        if is_tramite:
+            parent = page_by_path(pages, p["parent"])
+            crumbs.append((parent["service"], SITE + parent["path"]))
         crumbs.append((p.get("headline") or p.get("service") or p["title"], canonical))
         schema.append({
             "@context": "https://schema.org",
@@ -383,11 +500,14 @@ def layout(p, pages):
     image = SITE + p.get("image", "assets/img/cabos-cubierta.jpg")
     if is_article:
         body = article_body(p, pages, r)
+    elif is_tramite:
+        body = tramite_body(p, pages, r)
     else:
         guides = guides_of(pages, p["lang"])
         body = (p["body"]
                 .replace("{{GUIDES}}", guide_cards(guides, r, p["lang"]))
-                .replace("{{GUIDES_LATEST}}", guide_cards(guides[:3], r, p["lang"])))
+                .replace("{{GUIDES_LATEST}}", guide_cards(guides[:3], r, p["lang"]))
+                .replace("{{TRAMITES}}\n\n", (tramites_section(pages, p, r) + "\n") if tramites_of(pages, p["path"], p["lang"]) else ""))
     guides_block = re.compile(r"[ \t]*<!-- guides -->.*?<!-- /guides -->\n?", re.S)
     body = guides_block.sub("", body) if not SHOW_GUIDES else body.replace("<!-- guides -->\n", "").replace("<!-- /guides -->\n", "")
     body = body.replace("{{R}}", r)
@@ -518,18 +638,29 @@ def sitemap(pages):
     )
 
 
+def prune(f):
+    """Borra un archivo generado y las carpetas que queden vacías."""
+    f.unlink()
+    for parent in f.parents:
+        if parent == ROOT or any(parent.iterdir()):
+            break
+        parent.rmdir()
+
+
 def main():
     pages = [parse(f) for f in sorted(SRC.rglob("*.html"))]
+    if not SHOW_DRAFTS:
+        # Borrar los borradores generados en una ejecución anterior
+        for p in pages:
+            if p.get("draft") == "true" and (ROOT / p["path"] / "index.html").exists():
+                prune(ROOT / p["path"] / "index.html")
+        pages = [p for p in pages if p.get("draft") != "true"]
     if not SHOW_GUIDES:
         pages = [p for p in pages if not p["path"].startswith(GUIDE_PATHS)]
         # Borrar las guías generadas en una ejecución anterior
         for d in GUIDE_PATHS:
             for f in sorted((ROOT / d).rglob("index.html"), reverse=True):
-                f.unlink()
-                for parent in f.parents:
-                    if parent == ROOT or any(parent.iterdir()):
-                        break
-                    parent.rmdir()
+                prune(f)
     for p in pages:
         out = ROOT / p["path"] / "index.html"
         out.parent.mkdir(parents=True, exist_ok=True)
