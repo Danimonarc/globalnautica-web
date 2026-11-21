@@ -17,6 +17,7 @@ contacto lateral y las guías relacionadas los añade article_body().
 import json
 import os
 import re
+import subprocess
 from html import unescape
 from pathlib import Path
 
@@ -193,7 +194,33 @@ def parse(path):
         key, _, value = line.partition(":")
         meta[key.strip()] = value.strip()
     meta["body"] = text[m.end():]
+    meta["src"] = path.relative_to(ROOT).as_posix()
     return meta
+
+
+def git(*args):
+    """Salida de un comando git en la raíz del proyecto, o None si falla (sin git, sin repositorio…)."""
+    try:
+        r = subprocess.run(["git", *args], cwd=ROOT, capture_output=True, text=True)
+    except OSError:
+        return None
+    return r.stdout.strip() if r.returncode == 0 else None
+
+
+# En un clon superficial (el de GitHub Actions por defecto) todos los archivos parecerían
+# modificados en el último commit, así que no se calcula lastmod hasta tener el historial.
+SHALLOW = git("rev-parse", "--is-shallow-repository") != "false"
+
+
+def last_modified(p):
+    """Fecha (AAAA-MM-DD) del último cambio de la página, o None si no se sabe con certeza."""
+    if p.get("modified"):
+        return p["modified"]
+    if p.get("type") == "article":
+        return p["date"]
+    if SHALLOW:
+        return None
+    return git("log", "-1", "--format=%cs", "--", p["src"]) or None
 
 
 def rel(depth):
@@ -656,7 +683,9 @@ def sitemap(pages):
         links = "".join(
             f'\n    <xhtml:link rel="alternate" hreflang="{lg}" href="{u}"/>' for lg, u in alts
         )
-        rows.append(f"  <url>\n    <loc>{SITE + p['path']}</loc>{links}\n  </url>")
+        mod = last_modified(p)
+        lastmod = f"\n    <lastmod>{mod}</lastmod>" if mod else ""
+        rows.append(f"  <url>\n    <loc>{SITE + p['path']}</loc>{lastmod}{links}\n  </url>")
     return (
         '<?xml version="1.0" encoding="UTF-8"?>\n'
         '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" '

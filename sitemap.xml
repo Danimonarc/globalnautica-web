@@ -2,41 +2,49 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">
   <url>
     <loc>https://www.globalnautica.com/aviso-legal/</loc>
+    <lastmod>2026-10-17</lastmod>
     <xhtml:link rel="alternate" hreflang="es" href="https://www.globalnautica.com/aviso-legal/"/>
     <xhtml:link rel="alternate" hreflang="en" href="https://www.globalnautica.com/en/legal-notice/"/>
   </url>
   <url>
     <loc>https://www.globalnautica.com/consultoria-nautica/</loc>
+    <lastmod>2026-11-21</lastmod>
     <xhtml:link rel="alternate" hreflang="es" href="https://www.globalnautica.com/consultoria-nautica/"/>
     <xhtml:link rel="alternate" hreflang="en" href="https://www.globalnautica.com/en/nautical-consultancy-spain/"/>
   </url>
   <url>
     <loc>https://www.globalnautica.com/en/</loc>
+    <lastmod>2026-11-11</lastmod>
     <xhtml:link rel="alternate" hreflang="en" href="https://www.globalnautica.com/en/"/>
     <xhtml:link rel="alternate" hreflang="es" href="https://www.globalnautica.com/"/>
   </url>
   <url>
     <loc>https://www.globalnautica.com/en/legal-notice/</loc>
+    <lastmod>2026-10-09</lastmod>
     <xhtml:link rel="alternate" hreflang="en" href="https://www.globalnautica.com/en/legal-notice/"/>
     <xhtml:link rel="alternate" hreflang="es" href="https://www.globalnautica.com/aviso-legal/"/>
   </url>
   <url>
     <loc>https://www.globalnautica.com/en/nautical-consultancy-spain/</loc>
+    <lastmod>2026-11-21</lastmod>
     <xhtml:link rel="alternate" hreflang="en" href="https://www.globalnautica.com/en/nautical-consultancy-spain/"/>
     <xhtml:link rel="alternate" hreflang="es" href="https://www.globalnautica.com/consultoria-nautica/"/>
   </url>
   <url>
     <loc>https://www.globalnautica.com/en/yacht-tax-vat-spain/</loc>
+    <lastmod>2026-11-21</lastmod>
     <xhtml:link rel="alternate" hreflang="en" href="https://www.globalnautica.com/en/yacht-tax-vat-spain/"/>
     <xhtml:link rel="alternate" hreflang="es" href="https://www.globalnautica.com/fiscalidad-nautica/"/>
   </url>
   <url>
     <loc>https://www.globalnautica.com/fiscalidad-nautica/</loc>
+    <lastmod>2026-11-21</lastmod>
     <xhtml:link rel="alternate" hreflang="es" href="https://www.globalnautica.com/fiscalidad-nautica/"/>
     <xhtml:link rel="alternate" hreflang="en" href="https://www.globalnautica.com/en/yacht-tax-vat-spain/"/>
   </url>
   <url>
     <loc>https://www.globalnautica.com/</loc>
+    <lastmod>2026-11-11</lastmod>
     <xhtml:link rel="alternate" hreflang="es" href="https://www.globalnautica.com/"/>
     <xhtml:link rel="alternate" hreflang="en" href="https://www.globalnautica.com/en/"/>
   </url>

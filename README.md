@@ -146,6 +146,12 @@ En **Actions → Publicar en IONOS**, abrir la ejecución fallida y mirar el pas
 - `NOINDEX=0 python build.py` genera la versión del dominio real, como hace el workflow.
   No hace falta subirla a mano.
 
+## Sitemap y aviso a buscadores
+
+- `sitemap.xml` lleva `<lastmod>` en cada página: la fecha del último commit que tocó su archivo de `_src/` (en las guías, `modified:` o `date:`). Solo se calcula con el historial completo de git; en un clon superficial no se escribe, para no poner fechas falsas. Por eso el workflow de IONOS hace `fetch-depth: 0`.
+- `.github/scripts/indexnow.py` avisa a Bing y otros buscadores (IndexNow) de las páginas cambiadas en cada publicación. La clave es pública por diseño: `d5e2c2ee363eb2463d86370c2a3326f9.txt` en la raíz del sitio y la constante `KEY` del script deben coincidir. No falla si el servicio no responde. Prueba en local: `python .github/scripts/indexnow.py HEAD~3 --dry-run`.
+- Google no usa IndexNow: para Google vale el `sitemap.xml` enviado en Search Console.
+
 ## SEO
 
 Ya hecho en el código:
