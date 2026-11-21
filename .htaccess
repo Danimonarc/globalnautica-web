@@ -7,6 +7,9 @@ RewriteCond %{HTTPS} off [OR]
 RewriteCond %{HTTP_HOST} !^www\.globalnautica\.com$ [NC]
 RewriteRule ^(.*)$ https://www.globalnautica.com/$1 [R=301,L]
 
+# Página propia para las direcciones que no existen (mantiene el código 404)
+ErrorDocument 404 /404.html
+
 # Redirigir las URLs de la web antigua a sus equivalentes nuevas
 # (NE evita que el "#" de los anclajes se codifique)
 RewriteRule ^2\.html$ /#servicios [R=301,L,NE]

@@ -451,7 +451,9 @@ def article_body(p, pages, r):
 def layout(p, pages):
     t = T[p["lang"]]
     path = p["path"]
-    r = rel(depth_of(path))
+    # Páginas con «absolute: true» (la 404) se sirven desde cualquier ruta: enlaces con «/» inicial
+    r = "/" if p.get("absolute") == "true" else rel(depth_of(path))
+    indexable = p.get("noindex") != "true"
     is_article = p.get("type") == "article"
     is_tramite = p.get("type") == "tramite"
     is_home = path == t["home"]
@@ -504,7 +506,7 @@ def layout(p, pages):
                 for q, a in faq
             ],
         })
-    if not is_home:
+    if not is_home and indexable:
         crumbs = [("Global Nautica", SITE + t["home"])]
         if is_article:
             crumbs.append((t["guides"][1], SITE + t["guides"][0]))
@@ -556,7 +558,9 @@ def layout(p, pages):
     company = "\n".join(f'          <li><a href="{anchor(a)}">{label}</a></li>' for a, label in t["nav"] if a not in ("servicios", "services"))
     legal = "\n".join(f'          <li><a href="{link(r, u)}">{label}</a></li>' for u, label in t["legal"])
     legal_inline = " · ".join(f'<a href="{link(r, u)}">{label}</a>' for u, label in t["legal"])
-    robots = '  <meta name="robots" content="noindex">\n' if NOINDEX else ""
+    robots = '  <meta name="robots" content="noindex">\n' if (NOINDEX or not indexable) else ""
+    canon = f'  <link rel="canonical" href="{canonical}">\n{hreflang}\n' if indexable else ""
+    og_url = f'  <meta property="og:url" content="{canonical}">\n' if indexable else ""
     image = SITE + p.get("image", "assets/img/cabos-cubierta.jpg")
     if is_article:
         body = article_body(p, pages, r)
@@ -580,9 +584,7 @@ def layout(p, pages):
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>{p['title']}</title>
   <meta name="description" content="{p['description']}">
-{robots}  <link rel="canonical" href="{canonical}">
-{hreflang}
-  <meta name="theme-color" content="#0b2a5e">
+{robots}{canon}  <meta name="theme-color" content="#0b2a5e">
   <link rel="icon" href="{r}assets/img/favicon.svg" type="image/svg+xml">
 
   <meta property="og:type" content="{og_type}">
@@ -590,8 +592,7 @@ def layout(p, pages):
   <meta property="og:locale" content="{t['locale']}">
   <meta property="og:title" content="{p['title']}">
   <meta property="og:description" content="{p['description']}">
-  <meta property="og:url" content="{canonical}">
-  <meta property="og:image" content="{image}">
+{og_url}  <meta property="og:image" content="{image}">
 
   <link rel="stylesheet" href="{asset(r, 'assets/css/fonts.css')}">
   <link rel="stylesheet" href="{asset(r, 'assets/css/styles.css')}">
@@ -684,6 +685,8 @@ def layout(p, pages):
 def sitemap(pages):
     rows = []
     for p in pages:
+        if p.get("noindex") == "true":
+            continue
         alts = [(p["lang"], SITE + p["path"])]
         if "alt" in p:
             alts.append(("en" if p["lang"] == "es" else "es", SITE + p["alt"]))
@@ -724,7 +727,7 @@ def main():
             for f in sorted((ROOT / d).rglob("index.html"), reverse=True):
                 prune(f)
     for p in pages:
-        out = ROOT / p["path"] / "index.html"
+        out = ROOT / p["output"] if "output" in p else ROOT / p["path"] / "index.html"
         out.parent.mkdir(parents=True, exist_ok=True)
         out.write_text(layout(p, pages), encoding="utf-8", newline="\n")
         print("  ", out.relative_to(ROOT))

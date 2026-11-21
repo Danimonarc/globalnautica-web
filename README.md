@@ -28,6 +28,7 @@ _src/                         Contenido de cada página (esto es lo que se edita
   fiscalidad-nautica.html     -> /fiscalidad-nautica/
   consultoria-nautica.html    -> /consultoria-nautica/
   aviso-legal.html            -> /aviso-legal/ (aviso legal, privacidad y cookies)
+  404.html                    -> /404.html (página de error; la sirve .htaccess para cualquier dirección que no exista)
   guias/                      Guías (artículos) en español -> /guias/...
   en/                         Versión en inglés (/en/, /en/guides/...)
 build.py                      Genera las páginas, el sitemap.xml y las etiquetas hreflang
